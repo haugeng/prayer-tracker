@@ -1,1 +1,312 @@
-﻿// Type here
+
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Prayer Tracker Pro</title>
+    <style>
+        :root {
+            --bg: #121212; --card: #1e1e1e; --text: #e0e0e0;
+            --accent: #bb86fc; --success: #03dac6; --error: #cf6679;
+        }
+        body {
+            font-family: -apple-system, system-ui, sans-serif;
+            background-color: var(--bg); color: var(--text);
+            margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center;
+        }
+        .container { width: 100%; max-width: 500px; padding-bottom: 50px; }
+        h3 { border-bottom: 1px solid #333; padding-bottom: 8px; margin-top: 20px; display: flex; justify-content: space-between; }
+        
+        textarea, input {
+            width: 100%; background: var(--card); color: var(--text);
+            border: 1px solid #444; border-radius: 8px; padding: 12px;
+            box-sizing: border-box; font-size: 16px; margin-bottom: 10px;
+        }
+        textarea { height: 180px; resize: none; line-height: 1.5; }
+
+        .timer-box {
+            background: linear-gradient(145deg, #1e1e1e, #252525);
+            padding: 20px; border-radius: 15px; text-align: center;
+            margin: 15px 0; border: 1px solid #333;
+        }
+        #display-time { font-size: 3.5rem; font-weight: bold; font-family: monospace; color: var(--accent); }
+        
+        .btn {
+            padding: 12px 15px; border-radius: 8px; border: none;
+            font-weight: bold; cursor: pointer; font-size: 14px; margin: 5px;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .primary { background: var(--accent); color: #000; }
+        .stop { background: var(--error); color: white; }
+        .secondary { background: #333; color: white; }
+        .success { background: var(--success); color: #000; }
+        .full-width { width: 100%; margin: 10px 0; }
+
+        .nav { display: flex; width: 100%; gap: 5px; margin-bottom: 15px; position: sticky; top: 0; background: var(--bg); z-index: 10; padding: 5px 0; }
+        .nav button { flex: 1; padding: 10px 5px; }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .stat-card { background: var(--card); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #333; }
+        .stat-val { display: block; font-size: 1.2rem; font-weight: bold; color: var(--success); }
+        .stat-lbl { font-size: 0.7rem; color: #888; text-transform: uppercase; }
+
+        .history-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        .history-table td { border-bottom: 1px solid #333; padding: 15px 5px; vertical-align: top; }
+        .pointer-cell { white-space: pre-wrap; color: #bbb; outline: none; margin-top: 8px; display: block; font-style: italic; line-height: 1.4; }
+        
+        .manual-form { background: #252525; padding: 15px; border-radius: 10px; border: 1px dashed var(--accent); }
+        .hidden { display: none; }
+        label { font-size: 0.8rem; color: var(--accent); font-weight: bold; display: block; margin-bottom: 4px; }
+        
+        .wake-lock-status { font-size: 0.7rem; margin-top: 8px; color: #666; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="nav">
+        <button class="btn secondary" onclick="showPage('setup')">Timer</button>
+        <button class="btn secondary" onclick="showPage('manual')">Log</button>
+        <button class="btn secondary" onclick="showPage('history')">History</button>
+    </div>
+
+    <div id="setup-page">
+        <h3>Prayer Pointers</h3>
+        <textarea id="main-pointers" placeholder="Enter your prayer pointers here... They will be saved with your session when you stop the timer."></textarea>
+        
+        <div class="timer-box">
+            <div id="display-time">00:00:00</div>
+            <p id="session-status" style="color: #888; margin: 5px 0;">Ready to begin</p>
+            <div id="controls">
+                <button id="start-btn" class="btn primary" onclick="startSession()">Start Prayer</button>
+                <button id="pause-btn" class="btn secondary hidden" onclick="togglePause()">Pause</button>
+                <button id="stop-btn" class="btn stop hidden" onclick="stopSession()">Stop & Save</button>
+            </div>
+            <div class="wake-lock-status" id="wake-status">Wake-lock inactive</div>
+        </div>
+    </div>
+
+    <div id="manual-page" class="hidden">
+        <h3>Manual Entry</h3>
+        <div class="manual-form">
+            <label>Start Time</label>
+            <input type="datetime-local" id="manual-start">
+            <label>End Time</label>
+            <input type="datetime-local" id="manual-end">
+            <label>Session Pointers</label>
+            <textarea id="manual-pointers"></textarea>
+            <button class="btn success full-width" onclick="saveManualLog()">Add to History</button>
+        </div>
+    </div>
+
+    <div id="history-page" class="hidden">
+        <h3>Statistics</h3>
+        <div class="stats-grid">
+            <div class="stat-card"><span id="stat-total-mins" class="stat-val">0</span><span class="stat-lbl">Total Mins</span></div>
+            <div class="stat-card"><span id="stat-count" class="stat-val">0</span><span class="stat-lbl">Sessions</span></div>
+        </div>
+
+        <h3>Records</h3>
+        <p style="font-size: 0.75rem; color: #777; margin-bottom: 10px;">Tip: Tap text in history to edit pointers.</p>
+        <table class="history-table">
+            <tbody id="history-list"></tbody>
+        </table>
+
+        <div style="margin-top: 40px; border-top: 1px solid #333; padding-top: 15px;">
+            <button class="btn secondary full-width" onclick="exportToCSV()">📊 Export to CSV</button>
+            <button class="btn secondary full-width" onclick="backupJSON()">💾 Download JSON Backup</button>
+            <button class="btn secondary full-width" onclick="document.getElementById('importFile').click()">📂 Restore from Backup</button>
+            <input type="file" id="importFile" class="hidden" accept=".json" onchange="restoreJSON(event)">
+        </div>
+    </div>
+</div>
+
+<script>
+    let timerInterval, elapsedSeconds = 0, isPaused = false, startTime, wakeLock = null;
+
+    // LocalStorage management for main pointers
+    const mainPointersEl = document.getElementById('main-pointers');
+    mainPointersEl.value = localStorage.getItem('mainPointers') || "";
+    mainPointersEl.addEventListener('input', () => localStorage.setItem('mainPointers', mainPointersEl.value));
+
+    function showPage(page) {
+        ['setup-page', 'manual-page', 'history-page'].forEach(p => document.getElementById(p).classList.add('hidden'));
+        document.getElementById(page + '-page').classList.remove('hidden');
+        if(page === 'history') loadHistory();
+        if(page === 'manual') prepManualLog();
+    }
+
+    // Wake Lock to prevent mobile screen sleep
+    async function requestWakeLock() {
+        if ('wakeLock' in navigator) {
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+                document.getElementById('wake-status').innerText = "☀️ Screen stay-awake active";
+            } catch (err) { console.error(`Wake Lock Error: ${err.message}`); }
+        }
+    }
+
+    function releaseWakeLock() {
+        if (wakeLock) {
+            wakeLock.release().then(() => {
+                wakeLock = null;
+                document.getElementById('wake-status').innerText = "Wake-lock inactive";
+            });
+        }
+    }
+
+    // Live Timer Engine
+    function startSession() {
+        if (!isPaused) { 
+            startTime = new Date(); 
+            requestWakeLock();
+        }
+        isPaused = false;
+        document.getElementById('start-btn').classList.add('hidden');
+        document.getElementById('pause-btn').classList.remove('hidden');
+        document.getElementById('stop-btn').classList.remove('hidden');
+        document.getElementById('session-status').innerText = "Session in progress...";
+        timerInterval = setInterval(() => { elapsedSeconds++; updateTimerDisplay(); }, 1000);
+    }
+
+    function togglePause() {
+        if (!isPaused) {
+            clearInterval(timerInterval);
+            isPaused = true;
+            document.getElementById('pause-btn').innerText = "Resume";
+            document.getElementById('session-status').innerText = "Session Paused";
+            releaseWakeLock();
+        } else {
+            document.getElementById('pause-btn').innerText = "Pause";
+            startSession();
+        }
+    }
+
+    function stopSession() {
+        clearInterval(timerInterval);
+        const endTime = new Date();
+        saveRecord(startTime.toISOString(), endTime.toISOString(), elapsedSeconds, mainPointersEl.value);
+        releaseWakeLock();
+        
+        elapsedSeconds = 0; isPaused = false;
+        updateTimerDisplay();
+        document.getElementById('start-btn').classList.remove('hidden');
+        document.getElementById('pause-btn').classList.add('hidden');
+        document.getElementById('stop-btn').classList.add('hidden');
+        document.getElementById('session-status').innerText = "Session Saved!";
+    }
+
+    function updateTimerDisplay() {
+        const hrs = Math.floor(elapsedSeconds / 3600).toString().padStart(2, '0');
+        const mins = Math.floor((elapsedSeconds % 3600) / 60).toString().padStart(2, '0');
+        const secs = (elapsedSeconds % 60).toString().padStart(2, '0');
+        document.getElementById('display-time').innerText = `${hrs}:${mins}:${secs}`;
+    }
+
+    // Manual Entry Logic
+    function prepManualLog() {
+        const now = new Date();
+        const fmt = d => new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+        document.getElementById('manual-start').value = fmt(new Date(now - 1800000));
+        document.getElementById('manual-end').value = fmt(now);
+        document.getElementById('manual-pointers').value = mainPointersEl.value;
+    }
+
+    function saveManualLog() {
+        const s = new Date(document.getElementById('manual-start').value);
+        const e = new Date(document.getElementById('manual-end').value);
+        const diff = Math.floor((e - s) / 1000);
+        if (diff <= 0) return alert("Error: End time must be after start time.");
+        saveRecord(s.toISOString(), e.toISOString(), diff, document.getElementById('manual-pointers').value);
+        alert("Manual record saved.");
+        showPage('history');
+    }
+
+    // History and Data Persistence
+    function saveRecord(start, end, duration, pointers) {
+        let history = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
+        history.unshift({ id: Date.now(), start, end, duration, pointers });
+        localStorage.setItem('prayerHistory', JSON.stringify(history));
+    }
+
+    function loadHistory() {
+        const history = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
+        const list = document.getElementById('history-list');
+        list.innerHTML = "";
+        
+        let totalMins = 0;
+        history.forEach(item => {
+            totalMins += (item.duration / 60);
+            const startStr = new Date(item.start).toLocaleString([], {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong>${startStr}</strong>
+                        <span>${Math.round(item.duration / 60)}m <button class="btn" style="color:var(--error); padding:0 5px;" onclick="deleteRecord(${item.id})">✕</button></span>
+                    </div>
+                    <div class="pointer-cell" contenteditable="true" onblur="updateRecord(${item.id}, this.innerText)">${item.pointers}</div>
+                </td>
+            `;
+            list.appendChild(row);
+        });
+        document.getElementById('stat-total-mins').innerText = Math.floor(totalMins);
+        document.getElementById('stat-count').innerText = history.length;
+    }
+
+    function updateRecord(id, val) {
+        let history = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
+        const i = history.findIndex(h => h.id === id);
+        if(i !== -1) { history[i].pointers = val; localStorage.setItem('prayerHistory', JSON.stringify(history)); }
+    }
+
+    function deleteRecord(id) {
+        if(confirm("Permanently delete this record?")) {
+            let history = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
+            localStorage.setItem('prayerHistory', JSON.stringify(history.filter(h => h.id !== id)));
+            loadHistory();
+        }
+    }
+
+    // Export & Backup
+    function exportToCSV() {
+        const history = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
+        let csv = "Start Time,End Time,Minutes,Pointers\n" + history.map(i => 
+            `${new Date(i.start).toLocaleString().replace(/,/g,'')},${new Date(i.end).toLocaleString().replace(/,/g,'')},${Math.round(i.duration/60)},"${i.pointers.replace(/"/g,'""')}"`
+        ).join("\n");
+        downloadFile(csv, 'prayer_log_export.csv', 'text/csv');
+    }
+
+    function backupJSON() {
+        const data = localStorage.getItem('prayerHistory') || "[]";
+        downloadFile(data, 'prayer_tracker_backup.json', 'application/json');
+    }
+
+    function restoreJSON(event) {
+        const file = event.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            if(confirm("Merge this with your current history?")) {
+                let current = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
+                let imported = JSON.parse(e.target.result);
+                let merged = [...imported, ...current].filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
+                localStorage.setItem('prayerHistory', JSON.stringify(merged));
+                loadHistory();
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    function downloadFile(content, name, type) {
+        const blob = new Blob([content], {type});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = name; a.click();
+        URL.revokeObjectURL(url);
+    }
+</script>
+</body>
+</html>
+
