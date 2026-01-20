@@ -15,15 +15,22 @@
             margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center;
         }
         .container { width: 100%; max-width: 500px; padding-bottom: 50px; }
-        h3 { border-bottom: 1px solid #333; padding-bottom: 8px; margin-top: 20px; display: flex; justify-content: space-between; }
+        .header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .help-icon { 
+            background: #333; color: var(--text); width: 30px; height: 30px; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            font-weight: bold; cursor: pointer; border: 1px solid #444;
+        }
+        h3 { border-bottom: 1px solid #333; padding-bottom: 8px; margin-top: 10px; width: 100%; }
         
-        /* Updated Height: Added ~3 lines (Approx 240px) */
         textarea, input {
             width: 100%; background: var(--card); color: var(--text);
             border: 1px solid #444; border-radius: 8px; padding: 12px;
             box-sizing: border-box; font-size: 16px; margin-bottom: 10px;
         }
-        textarea { height: 240px; resize: none; line-height: 1.5; }
+        /* Main page textarea: Increased height by 1 line (~24px) */
+        #main-pointers { height: 264px; resize: none; line-height: 1.5; }
+        #manual-pointers { height: 240px; }
 
         .timer-box {
             background: linear-gradient(145deg, #1e1e1e, #252525);
@@ -53,18 +60,33 @@
 
         .history-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
         .history-table td { border-bottom: 1px solid #333; padding: 15px 5px; vertical-align: top; }
+        .editable-field { outline: none; transition: color 0.2s; }
+        .editable-field:focus { color: var(--accent); border-bottom: 1px dashed var(--accent); }
         .pointer-cell { white-space: pre-wrap; color: #bbb; outline: none; margin-top: 8px; display: block; font-style: italic; line-height: 1.4; }
         
+        #help-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 100;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: var(--card); width: 90%; max-width: 400px; padding: 25px;
+            border-radius: 15px; border: 1px solid var(--accent); max-height: 80vh; overflow-y: auto;
+        }
+        .close-modal { background: var(--accent); color: #000; width: 100%; padding: 10px; border-radius: 8px; margin-top: 15px; border: none; font-weight: bold; }
         .manual-form { background: #252525; padding: 15px; border-radius: 10px; border: 1px dashed var(--accent); }
         .hidden { display: none; }
         label { font-size: 0.8rem; color: var(--accent); font-weight: bold; display: block; margin-bottom: 4px; }
-        
-        .wake-lock-status { font-size: 0.7rem; margin-top: 8px; color: #666; font-style: italic; }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <div class="header">
+        <h2 style="margin: 0; font-size: 1.2rem;">Prayer Tracker Pro</h2>
+        <div class="help-icon" onclick="toggleModal(true)">?</div>
+    </div>
+
     <div class="nav">
         <button class="btn secondary" onclick="showPage('setup')">Timer</button>
         <button class="btn secondary" onclick="showPage('manual')">Log</button>
@@ -73,17 +95,15 @@
 
     <div id="setup-page">
         <h3>Prayer Pointers</h3>
-        <textarea id="main-pointers" placeholder="Enter your prayer pointers here..."></textarea>
-        
+        <textarea id="main-pointers" placeholder="What are you praying for?"></textarea>
         <div class="timer-box">
             <div id="display-time">00:00:00</div>
-            <p id="session-status" style="color: #888; margin: 5px 0;">Ready to begin</p>
+            <p id="session-status" style="color: #888; margin: 5px 0;">Ready</p>
             <div id="controls">
                 <button id="start-btn" class="btn primary" onclick="startSession()">Start Prayer</button>
                 <button id="pause-btn" class="btn secondary hidden" onclick="togglePause()">Pause</button>
                 <button id="stop-btn" class="btn stop hidden" onclick="stopSession()">Stop & Save</button>
             </div>
-            <div class="wake-lock-status" id="wake-status">Wake-lock inactive</div>
         </div>
     </div>
 
@@ -106,18 +126,25 @@
             <div class="stat-card"><span id="stat-total-mins" class="stat-val">0</span><span class="stat-lbl">Total Mins</span></div>
             <div class="stat-card"><span id="stat-count" class="stat-val">0</span><span class="stat-lbl">Sessions</span></div>
         </div>
-
-        <h3>Records (Latest First)</h3>
-        <table class="history-table">
-            <tbody id="history-list"></tbody>
-        </table>
-
+        <h3>Records</h3>
+        <p style="font-size: 0.7rem; color: #666; margin-bottom: 8px;">Tip: Tap date, time, mins, or pointers to edit.</p>
+        <table class="history-table"><tbody id="history-list"></tbody></table>
         <div style="margin-top: 40px; border-top: 1px solid #333; padding-top: 15px;">
             <button class="btn secondary full-width" onclick="exportToCSV()">📊 Export to CSV</button>
             <button class="btn secondary full-width" onclick="backupJSON()">💾 Download JSON Backup</button>
-            <button class="btn secondary full-width" onclick="document.getElementById('importFile').click()">📂 Restore from Backup</button>
+            <button class="btn secondary full-width" onclick="document.getElementById('importFile').click()">📂 Restore Backup</button>
             <input type="file" id="importFile" class="hidden" accept=".json" onchange="restoreJSON(event)">
         </div>
+    </div>
+</div>
+
+<div id="help-modal" class="hidden">
+    <div class="modal-content">
+        <h4>How to use</h4>
+        <p><strong>📱 Mobile:</strong> Use "Add to Home Screen" in your browser menu.</p>
+        <p><strong>✍️ Editing:</strong> In History, you can tap and edit the date, duration, and pointers directly.</p>
+        <p><strong>🔒 Privacy:</strong> Data stays 100% on this phone.</p>
+        <button class="close-modal" onclick="toggleModal(false)">Got it!</button>
     </div>
 </div>
 
@@ -128,6 +155,8 @@
     mainPointersEl.value = localStorage.getItem('mainPointers') || "";
     mainPointersEl.addEventListener('input', () => localStorage.setItem('mainPointers', mainPointersEl.value));
 
+    function toggleModal(show) { document.getElementById('help-modal').classList.toggle('hidden', !show); }
+
     function showPage(page) {
         ['setup-page', 'manual-page', 'history-page'].forEach(p => document.getElementById(p).classList.add('hidden'));
         document.getElementById(page + '-page').classList.remove('hidden');
@@ -136,21 +165,11 @@
     }
 
     async function requestWakeLock() {
-        if ('wakeLock' in navigator) {
-            try {
-                wakeLock = await navigator.wakeLock.request('screen');
-                document.getElementById('wake-status').innerText = "☀️ Screen stay-awake active";
-            } catch (err) { console.error(`Wake Lock Error: ${err.message}`); }
-        }
+        if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) { } }
     }
 
     function releaseWakeLock() {
-        if (wakeLock) {
-            wakeLock.release().then(() => {
-                wakeLock = null;
-                document.getElementById('wake-status').innerText = "Wake-lock inactive";
-            });
-        }
+        if (wakeLock) { wakeLock.release().then(() => { wakeLock = null; }); }
     }
 
     function startSession() {
@@ -159,34 +178,31 @@
         document.getElementById('start-btn').classList.add('hidden');
         document.getElementById('pause-btn').classList.remove('hidden');
         document.getElementById('stop-btn').classList.remove('hidden');
-        document.getElementById('session-status').innerText = "Session in progress...";
+        document.getElementById('session-status').innerText = "Praying...";
         timerInterval = setInterval(() => { elapsedSeconds++; updateTimerDisplay(); }, 1000);
     }
 
     function togglePause() {
         if (!isPaused) {
-            clearInterval(timerInterval);
-            isPaused = true;
+            clearInterval(timerInterval); isPaused = true;
             document.getElementById('pause-btn').innerText = "Resume";
-            document.getElementById('session-status').innerText = "Session Paused";
+            document.getElementById('session-status').innerText = "Paused";
             releaseWakeLock();
         } else {
-            document.getElementById('pause-btn').innerText = "Pause";
-            startSession();
+            document.getElementById('pause-btn').innerText = "Pause"; startSession();
         }
     }
 
     function stopSession() {
         clearInterval(timerInterval);
-        const endTime = new Date();
-        saveRecord(startTime.toISOString(), endTime.toISOString(), elapsedSeconds, mainPointersEl.value);
+        saveRecord(startTime.toISOString(), new Date().toISOString(), elapsedSeconds, mainPointersEl.value);
         releaseWakeLock();
         elapsedSeconds = 0; isPaused = false;
         updateTimerDisplay();
         document.getElementById('start-btn').classList.remove('hidden');
         document.getElementById('pause-btn').classList.add('hidden');
         document.getElementById('stop-btn').classList.add('hidden');
-        document.getElementById('session-status').innerText = "Session Saved!";
+        document.getElementById('session-status').innerText = "Saved!";
     }
 
     function updateTimerDisplay() {
@@ -208,56 +224,76 @@
         const s = new Date(document.getElementById('manual-start').value);
         const e = new Date(document.getElementById('manual-end').value);
         const diff = Math.floor((e - s) / 1000);
-        if (diff <= 0) return alert("Error: End time must be after start time.");
+        if (diff <= 0) return alert("End time must be after start time.");
         saveRecord(s.toISOString(), e.toISOString(), diff, document.getElementById('manual-pointers').value);
-        alert("Manual record saved.");
         showPage('history');
     }
 
     function saveRecord(start, end, duration, pointers) {
         let history = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
         history.push({ id: Date.now(), start, end, duration, pointers });
-        // Sort history by Start Time descending (Latest First)
         history.sort((a, b) => new Date(b.start) - new Date(a.start));
         localStorage.setItem('prayerHistory', JSON.stringify(history));
     }
 
     function loadHistory() {
         let history = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
-        // Re-sort on load just in case
         history.sort((a, b) => new Date(b.start) - new Date(a.start));
-        
         const list = document.getElementById('history-list');
         list.innerHTML = "";
-        
         let totalMins = 0;
         history.forEach(item => {
             totalMins += (item.duration / 60);
-            const startStr = new Date(item.start).toLocaleString([], {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
+            const d = new Date(item.start);
+            const dateStr = d.toLocaleDateString([], {month:'short', day:'numeric', year:'numeric'});
+            const timeStr = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
             const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <strong>${startStr}</strong>
-                        <span>${Math.round(item.duration / 60)}m <button class="btn" style="color:var(--error); padding:0 5px;" onclick="deleteRecord(${item.id})">✕</button></span>
-                    </div>
-                    <div class="pointer-cell" contenteditable="true" onblur="updateRecord(${item.id}, this.innerText)">${item.pointers}</div>
-                </td>
-            `;
+            row.innerHTML = `<td>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong>
+                        <span class="editable-field" contenteditable="true" onblur="updateField(${item.id}, 'startDate', this.innerText)">${dateStr}</span>, 
+                        <span class="editable-field" contenteditable="true" onblur="updateField(${item.id}, 'startTime', this.innerText)">${timeStr}</span>
+                    </strong>
+                    <span><span class="editable-field" contenteditable="true" onblur="updateField(${item.id}, 'duration', this.innerText)">${Math.round(item.duration / 60)}</span>m 
+                    <button class="btn" style="color:var(--error); padding:0 5px;" onclick="deleteRecord(${item.id})">✕</button></span>
+                </div>
+                <div class="pointer-cell editable-field" contenteditable="true" onblur="updateField(${item.id}, 'pointers', this.innerText)">${item.pointers}</div>
+            </td>`;
             list.appendChild(row);
         });
         document.getElementById('stat-total-mins').innerText = Math.floor(totalMins);
         document.getElementById('stat-count').innerText = history.length;
     }
 
-    function updateRecord(id, val) {
+    function updateField(id, field, val) {
         let history = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
         const i = history.findIndex(h => h.id === id);
-        if(i !== -1) { history[i].pointers = val; localStorage.setItem('prayerHistory', JSON.stringify(history)); }
+        if(i === -1) return;
+
+        if(field === 'pointers') history[i].pointers = val;
+        if(field === 'duration') history[i].duration = parseInt(val) * 60 || 0;
+        if(field === 'startDate' || field === 'startTime') {
+            const current = new Date(history[i].start);
+            if(field === 'startDate') {
+                const newD = new Date(val);
+                if(!isNaN(newD)) current.setFullYear(newD.getFullYear(), newD.getMonth(), newD.getDate());
+            } else {
+                const t = val.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+                if(t) {
+                    let h = parseInt(t[1]);
+                    if(t[3]?.toUpperCase() === 'PM' && h < 12) h += 12;
+                    if(t[3]?.toUpperCase() === 'AM' && h === 12) h = 0;
+                    current.setHours(h, parseInt(t[2]));
+                }
+            }
+            history[i].start = current.toISOString();
+        }
+        localStorage.setItem('prayerHistory', JSON.stringify(history));
+        loadHistory(); // Refresh stats and sorting
     }
 
     function deleteRecord(id) {
-        if(confirm("Permanently delete this record?")) {
+        if(confirm("Delete record?")) {
             let history = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
             localStorage.setItem('prayerHistory', JSON.stringify(history.filter(h => h.id !== id)));
             loadHistory();
@@ -266,41 +302,28 @@
 
     function exportToCSV() {
         let history = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
-        history.sort((a, b) => new Date(b.start) - new Date(a.start));
-        let csv = "Start Time,End Time,Minutes,Pointers\n" + history.map(i => 
-            `${new Date(i.start).toLocaleString().replace(/,/g,'')},${new Date(i.end).toLocaleString().replace(/,/g,'')},${Math.round(i.duration/60)},"${i.pointers.replace(/"/g,'""')}"`
-        ).join("\n");
-        downloadFile(csv, 'prayer_log_export.csv', 'text/csv');
+        let csv = "Start,Minutes,Pointers\n" + history.map(i => `${new Date(i.start).toLocaleString().replace(/,/g,'')},${Math.round(i.duration/60)},"${i.pointers.replace(/"/g,'""')}"`).join("\n");
+        const blob = new Blob([csv], {type:'text/csv'});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'prayer_log.csv'; a.click();
     }
 
     function backupJSON() {
-        const data = localStorage.getItem('prayerHistory') || "[]";
-        downloadFile(data, 'prayer_tracker_backup.json', 'application/json');
+        const blob = new Blob([localStorage.getItem('prayerHistory') || "[]"], {type:'application/json'});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'prayer_backup.json'; a.click();
     }
 
     function restoreJSON(event) {
-        const file = event.target.files[0];
-        if(!file) return;
         const reader = new FileReader();
         reader.onload = e => {
-            if(confirm("Merge this with your current history?")) {
+            if(confirm("Merge history?")) {
                 let current = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
                 let imported = JSON.parse(e.target.result);
                 let merged = [...imported, ...current].filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
-                merged.sort((a, b) => new Date(b.start) - new Date(a.start));
                 localStorage.setItem('prayerHistory', JSON.stringify(merged));
                 loadHistory();
             }
         };
-        reader.readAsText(file);
-    }
-
-    function downloadFile(content, name, type) {
-        const blob = new Blob([content], {type});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = name; a.click();
-        URL.revokeObjectURL(url);
+        reader.readAsText(event.target.files[0]);
     }
 </script>
 </body>
