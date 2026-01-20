@@ -1,5 +1,4 @@
-
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -18,12 +17,13 @@
         .container { width: 100%; max-width: 500px; padding-bottom: 50px; }
         h3 { border-bottom: 1px solid #333; padding-bottom: 8px; margin-top: 20px; display: flex; justify-content: space-between; }
         
+        /* Updated Height: Added ~3 lines (Approx 240px) */
         textarea, input {
             width: 100%; background: var(--card); color: var(--text);
             border: 1px solid #444; border-radius: 8px; padding: 12px;
             box-sizing: border-box; font-size: 16px; margin-bottom: 10px;
         }
-        textarea { height: 180px; resize: none; line-height: 1.5; }
+        textarea { height: 240px; resize: none; line-height: 1.5; }
 
         .timer-box {
             background: linear-gradient(145deg, #1e1e1e, #252525);
@@ -73,7 +73,7 @@
 
     <div id="setup-page">
         <h3>Prayer Pointers</h3>
-        <textarea id="main-pointers" placeholder="Enter your prayer pointers here... They will be saved with your session when you stop the timer."></textarea>
+        <textarea id="main-pointers" placeholder="Enter your prayer pointers here..."></textarea>
         
         <div class="timer-box">
             <div id="display-time">00:00:00</div>
@@ -107,8 +107,7 @@
             <div class="stat-card"><span id="stat-count" class="stat-val">0</span><span class="stat-lbl">Sessions</span></div>
         </div>
 
-        <h3>Records</h3>
-        <p style="font-size: 0.75rem; color: #777; margin-bottom: 10px;">Tip: Tap text in history to edit pointers.</p>
+        <h3>Records (Latest First)</h3>
         <table class="history-table">
             <tbody id="history-list"></tbody>
         </table>
@@ -125,7 +124,6 @@
 <script>
     let timerInterval, elapsedSeconds = 0, isPaused = false, startTime, wakeLock = null;
 
-    // LocalStorage management for main pointers
     const mainPointersEl = document.getElementById('main-pointers');
     mainPointersEl.value = localStorage.getItem('mainPointers') || "";
     mainPointersEl.addEventListener('input', () => localStorage.setItem('mainPointers', mainPointersEl.value));
@@ -137,7 +135,6 @@
         if(page === 'manual') prepManualLog();
     }
 
-    // Wake Lock to prevent mobile screen sleep
     async function requestWakeLock() {
         if ('wakeLock' in navigator) {
             try {
@@ -156,12 +153,8 @@
         }
     }
 
-    // Live Timer Engine
     function startSession() {
-        if (!isPaused) { 
-            startTime = new Date(); 
-            requestWakeLock();
-        }
+        if (!isPaused) { startTime = new Date(); requestWakeLock(); }
         isPaused = false;
         document.getElementById('start-btn').classList.add('hidden');
         document.getElementById('pause-btn').classList.remove('hidden');
@@ -188,7 +181,6 @@
         const endTime = new Date();
         saveRecord(startTime.toISOString(), endTime.toISOString(), elapsedSeconds, mainPointersEl.value);
         releaseWakeLock();
-        
         elapsedSeconds = 0; isPaused = false;
         updateTimerDisplay();
         document.getElementById('start-btn').classList.remove('hidden');
@@ -204,7 +196,6 @@
         document.getElementById('display-time').innerText = `${hrs}:${mins}:${secs}`;
     }
 
-    // Manual Entry Logic
     function prepManualLog() {
         const now = new Date();
         const fmt = d => new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
@@ -223,15 +214,19 @@
         showPage('history');
     }
 
-    // History and Data Persistence
     function saveRecord(start, end, duration, pointers) {
         let history = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
-        history.unshift({ id: Date.now(), start, end, duration, pointers });
+        history.push({ id: Date.now(), start, end, duration, pointers });
+        // Sort history by Start Time descending (Latest First)
+        history.sort((a, b) => new Date(b.start) - new Date(a.start));
         localStorage.setItem('prayerHistory', JSON.stringify(history));
     }
 
     function loadHistory() {
-        const history = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
+        let history = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
+        // Re-sort on load just in case
+        history.sort((a, b) => new Date(b.start) - new Date(a.start));
+        
         const list = document.getElementById('history-list');
         list.innerHTML = "";
         
@@ -269,9 +264,9 @@
         }
     }
 
-    // Export & Backup
     function exportToCSV() {
-        const history = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
+        let history = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
+        history.sort((a, b) => new Date(b.start) - new Date(a.start));
         let csv = "Start Time,End Time,Minutes,Pointers\n" + history.map(i => 
             `${new Date(i.start).toLocaleString().replace(/,/g,'')},${new Date(i.end).toLocaleString().replace(/,/g,'')},${Math.round(i.duration/60)},"${i.pointers.replace(/"/g,'""')}"`
         ).join("\n");
@@ -292,6 +287,7 @@
                 let current = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
                 let imported = JSON.parse(e.target.result);
                 let merged = [...imported, ...current].filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
+                merged.sort((a, b) => new Date(b.start) - new Date(a.start));
                 localStorage.setItem('prayerHistory', JSON.stringify(merged));
                 loadHistory();
             }
@@ -309,4 +305,3 @@
 </script>
 </body>
 </html>
-
