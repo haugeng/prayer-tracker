@@ -15,12 +15,14 @@
             margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center;
         }
         .container { width: 100%; max-width: 500px; padding-bottom: 50px; }
+        
         .header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
         .help-icon { 
-            background: #333; color: var(--text); width: 30px; height: 30px; 
+            background: #333; color: var(--text); width: 32px; height: 32px; 
             border-radius: 50%; display: flex; align-items: center; justify-content: center; 
             font-weight: bold; cursor: pointer; border: 1px solid #444;
         }
+
         h3 { border-bottom: 1px solid #333; padding-bottom: 8px; margin-top: 10px; width: 100%; }
         
         textarea, input {
@@ -28,7 +30,8 @@
             border: 1px solid #444; border-radius: 8px; padding: 12px;
             box-sizing: border-box; font-size: 16px; margin-bottom: 10px;
         }
-        /* Main page textarea: Increased height by 1 line (~24px) */
+        
+        /* Main page textarea: taller as requested */
         #main-pointers { height: 264px; resize: none; line-height: 1.5; }
         #manual-pointers { height: 240px; }
 
@@ -60,20 +63,25 @@
 
         .history-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
         .history-table td { border-bottom: 1px solid #333; padding: 15px 5px; vertical-align: top; }
+        
         .editable-field { outline: none; transition: color 0.2s; }
-        .editable-field:focus { color: var(--accent); border-bottom: 1px dashed var(--accent); }
+        .editable-field:focus { color: var(--accent); background: #2a2a2a; border-radius: 4px; }
+        
         .pointer-cell { white-space: pre-wrap; color: #bbb; outline: none; margin-top: 8px; display: block; font-style: italic; line-height: 1.4; }
         
+        /* Modal Fix */
         #help-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 100;
-            display: flex; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.9); z-index: 1000;
+            display: none; /* Controlled by toggleModal function */
+            justify-content: center; align-items: center;
         }
         .modal-content {
             background: var(--card); width: 90%; max-width: 400px; padding: 25px;
             border-radius: 15px; border: 1px solid var(--accent); max-height: 80vh; overflow-y: auto;
         }
-        .close-modal { background: var(--accent); color: #000; width: 100%; padding: 10px; border-radius: 8px; margin-top: 15px; border: none; font-weight: bold; }
+        .close-modal { background: var(--accent); color: #000; width: 100%; padding: 12px; border-radius: 8px; margin-top: 15px; border: none; font-weight: bold; cursor: pointer;}
+        
         .manual-form { background: #252525; padding: 15px; border-radius: 10px; border: 1px dashed var(--accent); }
         .hidden { display: none; }
         label { font-size: 0.8rem; color: var(--accent); font-weight: bold; display: block; margin-bottom: 4px; }
@@ -95,7 +103,7 @@
 
     <div id="setup-page">
         <h3>Prayer Pointers</h3>
-        <textarea id="main-pointers" placeholder="What are you praying for?"></textarea>
+        <textarea id="main-pointers" placeholder="Enter your prayer points here..."></textarea>
         <div class="timer-box">
             <div id="display-time">00:00:00</div>
             <p id="session-status" style="color: #888; margin: 5px 0;">Ready</p>
@@ -127,7 +135,7 @@
             <div class="stat-card"><span id="stat-count" class="stat-val">0</span><span class="stat-lbl">Sessions</span></div>
         </div>
         <h3>Records</h3>
-        <p style="font-size: 0.7rem; color: #666; margin-bottom: 8px;">Tip: Tap date, time, mins, or pointers to edit.</p>
+        <p style="font-size: 0.7rem; color: #666; margin-bottom: 8px;">Tap Date, Mins, or Pointers to edit.</p>
         <table class="history-table"><tbody id="history-list"></tbody></table>
         <div style="margin-top: 40px; border-top: 1px solid #333; padding-top: 15px;">
             <button class="btn secondary full-width" onclick="exportToCSV()">📊 Export to CSV</button>
@@ -138,12 +146,12 @@
     </div>
 </div>
 
-<div id="help-modal" class="hidden">
+<div id="help-modal">
     <div class="modal-content">
-        <h4>How to use</h4>
-        <p><strong>📱 Mobile:</strong> Use "Add to Home Screen" in your browser menu.</p>
+        <h4>App Guide</h4>
+        <p><strong>📱 Install:</strong> Tap "Share" and <b>"Add to Home Screen"</b> to use as a full-screen app.</p>
         <p><strong>✍️ Editing:</strong> In History, you can tap and edit the date, duration, and pointers directly.</p>
-        <p><strong>🔒 Privacy:</strong> Data stays 100% on this phone.</p>
+        <p><strong>🔒 Privacy:</strong> Data stays 100% on this phone in your local storage.</p>
         <button class="close-modal" onclick="toggleModal(false)">Got it!</button>
     </div>
 </div>
@@ -155,17 +163,23 @@
     mainPointersEl.value = localStorage.getItem('mainPointers') || "";
     mainPointersEl.addEventListener('input', () => localStorage.setItem('mainPointers', mainPointersEl.value));
 
-    function toggleModal(show) { document.getElementById('help-modal').classList.toggle('hidden', !show); }
+    // Improved Toggle Logic
+    function toggleModal(show) {
+        const modal = document.getElementById('help-modal');
+        modal.style.display = show ? 'flex' : 'none';
+    }
 
     function showPage(page) {
-        ['setup-page', 'manual-page', 'history-page'].forEach(p => document.getElementById(p).classList.add('hidden'));
+        ['setup-page', 'manual-page', 'history-page'].forEach(p => {
+            document.getElementById(p).classList.add('hidden');
+        });
         document.getElementById(page + '-page').classList.remove('hidden');
         if(page === 'history') loadHistory();
         if(page === 'manual') prepManualLog();
     }
 
     async function requestWakeLock() {
-        if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) { } }
+        if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} }
     }
 
     function releaseWakeLock() {
@@ -289,7 +303,7 @@
             history[i].start = current.toISOString();
         }
         localStorage.setItem('prayerHistory', JSON.stringify(history));
-        loadHistory(); // Refresh stats and sorting
+        loadHistory();
     }
 
     function deleteRecord(id) {
