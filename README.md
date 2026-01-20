@@ -2,7 +2,7 @@
 
 A lightweight, private, and distraction-free web app designed to help you track your prayer sessions and keep a digital journal of your prayer pointers.
 
-**Link:** 
+**Link:** https://haugeng.github.io/prayer-tracker
 
 ## ✨ Features
 
