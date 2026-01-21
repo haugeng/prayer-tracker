@@ -38,6 +38,7 @@
             box-sizing: border-box; font-size: 16px; margin-bottom: 12px;
         }
         #main-pointers { height: 264px; resize: none; line-height: 1.5; }
+        #manual-pointers { height: 240px; } /* Restored height */
 
         /* Timer Card */
         .timer-box {
@@ -72,6 +73,7 @@
         .action-btn { background: #333; color: #eee; font-size: 11px; padding: 8px 12px; border-radius: 6px; border: none; flex: 1; }
 
         .intro-text { color: var(--text); font-size: 0.95rem; margin-bottom: 25px; opacity: 0.9; line-height: 1.6; }
+        .verse-footer { margin-top: 30px; text-align: center; font-size: 0.8rem; color: #555; font-style: italic; }
         .hidden { display: none; }
     </style>
 </head>
@@ -101,6 +103,7 @@
                 <button id="stop-btn" class="btn stop hidden" onclick="stopSession()">End</button>
             </div>
         </div>
+        <div class="verse-footer">"Pray without ceasing." — 1 Thess 5:17</div>
     </div>
 
     <div id="manual-page" class="hidden">
@@ -151,7 +154,6 @@
 </div>
 
 <script>
-    // --- DATABASE MANAGER ---
     const db = {
         getHistory: () => JSON.parse(localStorage.getItem('prayerHistory') || "[]"),
         saveHistory: (data) => localStorage.setItem('prayerHistory', JSON.stringify(data)),
@@ -161,10 +163,8 @@
         getLastBackup: () => localStorage.getItem('lastBackupDate') || 0
     };
 
-    // --- STATE ---
     let timerInterval, elapsedSeconds = 0, isPaused = false, startTime, wakeLock = null;
 
-    // --- APP LOGIC ---
     const mainPointersEl = document.getElementById('main-pointers');
     mainPointersEl.value = db.getPointers();
     mainPointersEl.addEventListener('input', () => db.savePointers(mainPointersEl.value));
