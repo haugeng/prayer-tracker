@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Prayer Tracker Pro</title>
+    <title>My Prayer Tracker</title>
     <style>
         :root {
             --bg: #121212; --card: #1e1e1e; --text: #e0e0e0;
@@ -16,11 +16,15 @@
         }
         .container { width: 100%; max-width: 500px; padding-bottom: 50px; }
         
-        .header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        
-        /* Nav Bar - Scrolled for mobile */
+        .header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .help-icon { 
+            background: #333; color: var(--text); width: 32px; height: 32px; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            font-weight: bold; cursor: pointer; border: 1px solid #444; font-size: 18px;
+        }
+
         .nav { display: flex; width: 100%; gap: 8px; margin-bottom: 20px; position: sticky; top: 0; background: var(--bg); z-index: 10; padding: 5px 0; }
-        .nav button { flex: 1; padding: 12px 5px; font-size: 13px; border-radius: 10px; }
+        .nav button { flex: 1; padding: 12px 5px; font-size: 14px; border-radius: 10px; }
 
         h3 { border-bottom: 1px solid #333; padding-bottom: 8px; margin-top: 10px; font-size: 1.1rem; }
         
@@ -29,33 +33,32 @@
             border: 1px solid #444; border-radius: 12px; padding: 14px;
             box-sizing: border-box; font-size: 16px; margin-bottom: 12px;
         }
-        #main-pointers { height: 264px; resize: none; line-height: 1.5; border: 1px solid #333; }
+        #main-pointers { height: 264px; resize: none; line-height: 1.5; }
         #manual-pointers { height: 240px; }
 
-        /* Timer UI */
         .timer-box {
             background: linear-gradient(145deg, #1e1e1e, #222);
             padding: 30px 20px; border-radius: 20px; text-align: center;
-            margin: 15px 0; border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            margin: 15px 0; border: 1px solid #333;
         }
-        #display-time { font-size: 3.8rem; font-weight: bold; font-family: 'Courier New', monospace; color: var(--accent); letter-spacing: -2px; }
+        #display-time { font-size: 3.5rem; font-weight: bold; font-family: monospace; color: var(--accent); }
         
-        .btn { border: none; font-weight: bold; cursor: pointer; transition: opacity 0.2s; }
-        .btn:active { opacity: 0.7; }
+        .btn { border: none; font-weight: bold; cursor: pointer; }
         .primary { background: var(--accent); color: #000; }
         .stop { background: var(--error); color: white; }
         .secondary { background: #2a2a2a; color: white; }
         .success { background: var(--success); color: #000; }
         .full-width { width: 100%; margin-top: 10px; padding: 15px; border-radius: 12px; }
 
-        /* History Styling */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
         .stat-card { background: var(--card); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #333; }
         .stat-val { display: block; font-size: 1.4rem; font-weight: bold; color: var(--success); }
-        .stat-lbl { font-size: 0.65rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-lbl { font-size: 0.65rem; color: #888; text-transform: uppercase; }
 
         .history-row { border-bottom: 1px solid #222; }
         .row-summary { display: flex; justify-content: space-between; align-items: center; padding: 16px 5px; cursor: pointer; }
+        .row-summary > div:first-child { display: flex; gap: 4px; }
+        
         .pointer-container { max-height: 0; overflow: hidden; transition: all 0.3s ease; background: #161616; border-radius: 10px; }
         .pointer-container.expanded { max-height: 1000px; padding: 15px; margin-bottom: 15px; border: 1px solid #333; }
         .pointer-cell { white-space: pre-wrap; color: #ccc; outline: none; font-style: italic; line-height: 1.6; font-size: 14px; }
@@ -63,11 +66,9 @@
         .action-bar { display: flex; gap: 10px; margin-top: 15px; padding-top: 12px; border-top: 1px solid #333; }
         .action-btn { background: #333; color: #eee; font-size: 11px; padding: 8px 12px; border-radius: 6px; border: none; flex: 1; }
 
-        /* About/Readme Page */
         .about-section { line-height: 1.7; color: #bbb; }
         .about-section h4 { color: var(--accent); margin: 20px 0 5px 0; }
-        .about-section p { margin-top: 0; font-size: 0.95rem; }
-
+        .intro-text { color: var(--text); font-size: 0.95rem; margin-bottom: 25px; opacity: 0.9; }
         .hidden { display: none; }
         .verse-footer { margin-top: 30px; text-align: center; font-size: 0.8rem; color: #555; font-style: italic; }
     </style>
@@ -76,39 +77,39 @@
 
 <div class="container">
     <div class="header">
-        <h2 style="margin: 0; font-size: 1.3rem; letter-spacing: -0.5px;">Prayer Tracker <span style="color: var(--accent);">Pro</span></h2>
+        <h2 style="margin: 0; font-size: 1.3rem;">My Prayer Tracker</h2>
+        <div class="help-icon" onclick="showPage('about')">?</div>
     </div>
 
     <div class="nav">
         <button class="btn secondary" onclick="showPage('setup')">Timer</button>
         <button class="btn secondary" onclick="showPage('manual')">Log</button>
         <button class="btn secondary" onclick="showPage('history')">History</button>
-        <button class="btn secondary" onclick="showPage('about')">About</button>
     </div>
 
     <div id="setup-page">
-        <h3>Prayer Pointers</h3>
+        <h3>Current Pointers</h3>
         <textarea id="main-pointers" placeholder="What's on your heart?"></textarea>
         <div class="timer-box">
             <div id="display-time">00:00:00</div>
-            <p id="session-status" style="color: #666; margin: 10px 0; font-size: 0.9rem;">Ready to begin</p>
+            <p id="session-status" style="color: #666; margin: 10px 0; font-size: 0.9rem;">Ready</p>
             <div style="display: flex; justify-content: center; gap: 10px;">
-                <button id="start-btn" class="btn primary" style="padding: 15px 30px; border-radius: 12px;" onclick="startSession()">Start Prayer</button>
+                <button id="start-btn" class="btn primary" style="padding: 15px 25px; border-radius: 12px;" onclick="startSession()">Start Prayer</button>
                 <button id="pause-btn" class="btn secondary hidden" style="padding: 15px 20px; border-radius: 12px;" onclick="togglePause()">Pause</button>
                 <button id="stop-btn" class="btn stop hidden" style="padding: 15px 20px; border-radius: 12px;" onclick="stopSession()">End</button>
             </div>
         </div>
-        <div class="verse-footer">"Devote yourselves to prayer, being watchful and thankful." — Colossians 4:2</div>
+        <div class="verse-footer">"Pray without ceasing." — 1 Thess 5:17</div>
     </div>
 
     <div id="manual-page" class="hidden">
         <h3>Manual Entry</h3>
         <div style="background: #1a1a1a; padding: 20px; border-radius: 15px; border: 1px solid #333;">
-            <label style="font-size: 0.7rem; color: var(--accent); font-weight: bold; display: block; margin-bottom: 5px;">START TIME</label>
+            <label style="font-size: 0.7rem; color: var(--accent); font-weight: bold;">START TIME</label>
             <input type="datetime-local" id="manual-start">
-            <label style="font-size: 0.7rem; color: var(--accent); font-weight: bold; display: block; margin-bottom: 5px; margin-top: 10px;">END TIME</label>
+            <label style="font-size: 0.7rem; color: var(--accent); font-weight: bold;">END TIME</label>
             <input type="datetime-local" id="manual-end">
-            <textarea id="manual-pointers" placeholder="What did you pray about?"></textarea>
+            <textarea id="manual-pointers" placeholder="Notes for this session..."></textarea>
             <button class="btn success full-width" onclick="saveManualLog()">Add to History</button>
         </div>
     </div>
@@ -119,12 +120,12 @@
             <div class="stat-card"><span id="stat-total-mins" class="stat-val">0</span><span class="stat-lbl">Total Mins</span></div>
             <div class="stat-card"><span id="stat-count" class="stat-val">0</span><span class="stat-lbl">Sessions</span></div>
         </div>
-        <h3>Session History</h3>
-        <p style="font-size: 0.75rem; color: #666; margin-bottom: 15px;">Tap row to expand. Tap text to edit.</p>
+        <h3>Records</h3>
+        <p style="font-size: 0.75rem; color: #666; margin-bottom: 15px;">Tap space to expand. Tap text to edit.</p>
         <div id="history-list"></div>
         
         <div style="margin-top: 40px; border-top: 1px solid #333; padding-top: 20px; display: flex; flex-direction: column; gap: 10px;">
-            <button class="btn secondary" style="padding: 12px;" onclick="exportToCSV()">📊 Export to CSV (Excel)</button>
+            <button class="btn secondary" style="padding: 12px;" onclick="exportToCSV()">📊 Export to CSV</button>
             <button class="btn secondary" style="padding: 12px;" onclick="backupJSON()">💾 Download JSON Backup</button>
             <button class="btn secondary" style="padding: 12px;" onclick="document.getElementById('importFile').click()">📂 Restore from Backup</button>
             <input type="file" id="importFile" class="hidden" accept=".json" onchange="restoreJSON(event)">
@@ -134,25 +135,32 @@
     <div id="about-page" class="hidden">
         <h3>User Guide</h3>
         <div class="about-section">
-            <h4>📱 App Installation</h4>
-            <p>This is a Progressive Web App. For the best experience, tap <strong>Share</strong> and then <strong>'Add to Home Screen'</strong>. It will look and act like a native app.</p>
+            <p class="intro-text">A lightweight, private, and distraction-free web app designed to help you track your prayer sessions and keep a digital journal of your prayer pointers.</p>
             
-            <h4>🔒 Privacy & Security</h4>
-            <p>Your data is stored <strong>locally in your browser</strong>. No cloud servers are used. To ensure you never lose your history, we recommend downloading a JSON backup monthly.</p>
-            
-            <h4>⏱️ Focus Mode</h4>
-            <p>While the timer is running, the app will attempt to keep your screen from dimming or locking (Wake Lock API).</p>
+            <h4>📖 Manual Logging</h4>
+            <p>Missed a session? Use the <strong>Log</strong> tab to backdate entries. Simply select your start and end times, paste your pointers, and save. The app will automatically calculate the duration for you.</p>
 
-            <h4>✍️ Editing Records</h4>
-            <p>Made a mistake? In the History tab, you can tap and directly edit any date, duration, or prayer note.</p>
+            <h4>📲 Transferring Data</h4>
+            <p>To move your data to a new phone or browser:</p>
+            <ol>
+                <li>On the <strong>old</strong> device, go to History and tap <strong>Download JSON Backup</strong>.</li>
+                <li>Send that file to your <strong>new</strong> device.</li>
+                <li>On the <strong>new</strong> device, open the app, go to History, tap <strong>Restore from Backup</strong>, and select the file.</li>
+            </ol>
+            
+            <h4>🔒 Privacy</h4>
+            <p>Your data is stored <strong>locally</strong> in your browser's memory. It never touches a server. Please backup regularly to avoid data loss if you clear your browser cache.</p>
+            
+            <h4>📱 Install as App</h4>
+            <p>Tap <strong>Share</strong> (iOS) or <strong>Menu</strong> (Android) and select <strong>'Add to Home Screen'</strong> to use this without the browser address bar.</p>
         </div>
+        <button class="btn secondary full-width" style="margin-top:20px;" onclick="showPage('setup')">Back to App</button>
     </div>
 </div>
 
 <script>
     let timerInterval, elapsedSeconds = 0, isPaused = false, startTime, wakeLock = null;
 
-    // Load Pointers
     const mainPointersEl = document.getElementById('main-pointers');
     mainPointersEl.value = localStorage.getItem('mainPointers') || "";
     mainPointersEl.addEventListener('input', () => localStorage.setItem('mainPointers', mainPointersEl.value));
@@ -197,7 +205,7 @@
         document.getElementById('start-btn').classList.remove('hidden');
         document.getElementById('pause-btn').classList.add('hidden');
         document.getElementById('stop-btn').classList.add('hidden');
-        document.getElementById('session-status').innerText = "Session Saved";
+        document.getElementById('session-status').innerText = "Saved";
     }
 
     function updateTimerDisplay() {
@@ -247,11 +255,11 @@
             itemEl.className = "history-row";
             itemEl.innerHTML = `
                 <div class="row-summary" onclick="toggleRow(${item.id})">
-                    <div>
-                        <strong contenteditable="true" onclick="event.stopPropagation()" onblur="updateField(${item.id}, 'startDate', this.innerText)">${dateStr}</strong>, 
+                    <div style="flex-grow: 1;">
+                        <span style="font-weight:bold;" contenteditable="true" onclick="event.stopPropagation()" onblur="updateField(${item.id}, 'startDate', this.innerText)">${dateStr}</span>, 
                         <span style="color:#777" contenteditable="true" onclick="event.stopPropagation()" onblur="updateField(${item.id}, 'startTime', this.innerText)">${timeStr}</span>
                     </div>
-                    <div style="font-weight:bold; color:var(--success)">
+                    <div style="font-weight:bold; color:var(--success); min-width: 60px; text-align: right;">
                         <span contenteditable="true" onclick="event.stopPropagation()" onblur="updateField(${item.id}, 'duration', this.innerText)">${Math.round(item.duration / 60)}</span>m
                     </div>
                 </div>
@@ -273,12 +281,7 @@
 
     function copyToClipboard(id) {
         const text = document.querySelector(`#container-${id} .pointer-cell`).innerText;
-        navigator.clipboard.writeText(text).then(() => {
-            const btn = document.querySelector(`#container-${id} .action-btn`);
-            const oldText = btn.innerText;
-            btn.innerText = "✅ Copied!";
-            setTimeout(() => { btn.innerText = oldText; }, 2000);
-        });
+        navigator.clipboard.writeText(text).then(() => alert("Copied!"));
     }
 
     function updateField(id, field, val) {
@@ -286,7 +289,7 @@
         const i = history.findIndex(h => h.id === id);
         if(i === -1) return;
         if(field === 'pointers') history[i].pointers = val;
-        if(field === 'duration') history[i].duration = parseInt(val) * 60 || 0;
+        if(field === 'duration') history[i].duration = (parseInt(val) || 0) * 60;
         if(field === 'startDate' || field === 'startTime') {
             const current = new Date(history[i].start);
             if(field === 'startDate') {
@@ -304,10 +307,11 @@
             history[i].start = current.toISOString();
         }
         localStorage.setItem('prayerHistory', JSON.stringify(history));
+        if(field !== 'pointers') loadHistory();
     }
 
     function deleteRecord(id) {
-        if(confirm("Permanently delete this record?")) {
+        if(confirm("Delete this record?")) {
             let history = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
             localStorage.setItem('prayerHistory', JSON.stringify(history.filter(h => h.id !== id)));
             loadHistory();
@@ -316,8 +320,8 @@
 
     function exportToCSV() {
         let history = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
-        let csv = "Start,Minutes,Pointers\n" + history.map(i => `${new Date(i.start).toLocaleString().replace(/,/g,'')},${Math.round(i.duration/60)},"${(i.pointers||'').replace(/"/g,'""')}"`).join("\n");
-        const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'})); a.download = 'prayer_export.csv'; a.click();
+        let csv = "Date,Duration (Min),Notes\n" + history.map(i => `${new Date(i.start).toLocaleString().replace(/,/g,'')},${Math.round(i.duration/60)},"${(i.pointers||'').replace(/"/g,'""')}"`).join("\n");
+        const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'})); a.download = 'prayer_log.csv'; a.click();
     }
 
     function backupJSON() {
@@ -327,7 +331,7 @@
     function restoreJSON(event) {
         const reader = new FileReader();
         reader.onload = e => {
-            if(confirm("Merge this file with your existing history?")) {
+            if(confirm("Merge history?")) {
                 let current = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
                 let imported = JSON.parse(e.target.result);
                 let merged = [...imported, ...current].filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
