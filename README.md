@@ -38,4 +38,4 @@ To use this like a native app on your phone:
 * **Backups:** Since data is stored in your browser, clearing your browser cache will delete your history. Use the **JSON Backup** feature regularly to keep your data safe.
 
 ---
-*Created with care for personal spiritual growth.*
+*Devote yourselves to prayer, being watchful and thankful.*
