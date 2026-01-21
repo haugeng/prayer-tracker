@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Prayer Tracker</title>
+    <title>Prayer Tracker Pro</title>
     <style>
         :root {
             --bg: #121212; --card: #1e1e1e; --text: #e0e0e0;
@@ -16,114 +16,99 @@
         }
         .container { width: 100%; max-width: 500px; padding-bottom: 50px; }
         
-        .header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
-        .help-icon { 
-            background: #333; color: var(--text); width: 32px; height: 32px; 
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            font-weight: bold; cursor: pointer; border: 1px solid #444;
-        }
+        .header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        
+        /* Nav Bar - Scrolled for mobile */
+        .nav { display: flex; width: 100%; gap: 8px; margin-bottom: 20px; position: sticky; top: 0; background: var(--bg); z-index: 10; padding: 5px 0; }
+        .nav button { flex: 1; padding: 12px 5px; font-size: 13px; border-radius: 10px; }
 
-        h3 { border-bottom: 1px solid #333; padding-bottom: 8px; margin-top: 10px; width: 100%; }
+        h3 { border-bottom: 1px solid #333; padding-bottom: 8px; margin-top: 10px; font-size: 1.1rem; }
         
         textarea, input {
             width: 100%; background: var(--card); color: var(--text);
-            border: 1px solid #444; border-radius: 8px; padding: 12px;
-            box-sizing: border-box; font-size: 16px; margin-bottom: 10px;
+            border: 1px solid #444; border-radius: 12px; padding: 14px;
+            box-sizing: border-box; font-size: 16px; margin-bottom: 12px;
         }
-        
-        /* Main page textarea: taller as requested */
-        #main-pointers { height: 264px; resize: none; line-height: 1.5; }
+        #main-pointers { height: 264px; resize: none; line-height: 1.5; border: 1px solid #333; }
         #manual-pointers { height: 240px; }
 
+        /* Timer UI */
         .timer-box {
-            background: linear-gradient(145deg, #1e1e1e, #252525);
-            padding: 20px; border-radius: 15px; text-align: center;
-            margin: 15px 0; border: 1px solid #333;
+            background: linear-gradient(145deg, #1e1e1e, #222);
+            padding: 30px 20px; border-radius: 20px; text-align: center;
+            margin: 15px 0; border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        #display-time { font-size: 3.5rem; font-weight: bold; font-family: monospace; color: var(--accent); }
+        #display-time { font-size: 3.8rem; font-weight: bold; font-family: 'Courier New', monospace; color: var(--accent); letter-spacing: -2px; }
         
-        .btn {
-            padding: 12px 15px; border-radius: 8px; border: none;
-            font-weight: bold; cursor: pointer; font-size: 14px; margin: 5px;
-            display: inline-flex; align-items: center; justify-content: center;
-        }
+        .btn { border: none; font-weight: bold; cursor: pointer; transition: opacity 0.2s; }
+        .btn:active { opacity: 0.7; }
         .primary { background: var(--accent); color: #000; }
         .stop { background: var(--error); color: white; }
-        .secondary { background: #333; color: white; }
+        .secondary { background: #2a2a2a; color: white; }
         .success { background: var(--success); color: #000; }
-        .full-width { width: 100%; margin: 10px 0; }
+        .full-width { width: 100%; margin-top: 10px; padding: 15px; border-radius: 12px; }
 
-        .nav { display: flex; width: 100%; gap: 5px; margin-bottom: 15px; position: sticky; top: 0; background: var(--bg); z-index: 10; padding: 5px 0; }
-        .nav button { flex: 1; padding: 10px 5px; }
+        /* History Styling */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .stat-card { background: var(--card); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #333; }
+        .stat-val { display: block; font-size: 1.4rem; font-weight: bold; color: var(--success); }
+        .stat-lbl { font-size: 0.65rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
 
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .stat-card { background: var(--card); padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #333; }
-        .stat-val { display: block; font-size: 1.2rem; font-weight: bold; color: var(--success); }
-        .stat-lbl { font-size: 0.7rem; color: #888; text-transform: uppercase; }
+        .history-row { border-bottom: 1px solid #222; }
+        .row-summary { display: flex; justify-content: space-between; align-items: center; padding: 16px 5px; cursor: pointer; }
+        .pointer-container { max-height: 0; overflow: hidden; transition: all 0.3s ease; background: #161616; border-radius: 10px; }
+        .pointer-container.expanded { max-height: 1000px; padding: 15px; margin-bottom: 15px; border: 1px solid #333; }
+        .pointer-cell { white-space: pre-wrap; color: #ccc; outline: none; font-style: italic; line-height: 1.6; font-size: 14px; }
+        
+        .action-bar { display: flex; gap: 10px; margin-top: 15px; padding-top: 12px; border-top: 1px solid #333; }
+        .action-btn { background: #333; color: #eee; font-size: 11px; padding: 8px 12px; border-radius: 6px; border: none; flex: 1; }
 
-        .history-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-        .history-table td { border-bottom: 1px solid #333; padding: 15px 5px; vertical-align: top; }
-        
-        .editable-field { outline: none; transition: color 0.2s; }
-        .editable-field:focus { color: var(--accent); background: #2a2a2a; border-radius: 4px; }
-        
-        .pointer-cell { white-space: pre-wrap; color: #bbb; outline: none; margin-top: 8px; display: block; font-style: italic; line-height: 1.4; }
-        
-        /* Modal Fix */
-        #help-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 1000;
-            display: none; /* Controlled by toggleModal function */
-            justify-content: center; align-items: center;
-        }
-        .modal-content {
-            background: var(--card); width: 90%; max-width: 400px; padding: 25px;
-            border-radius: 15px; border: 1px solid var(--accent); max-height: 80vh; overflow-y: auto;
-        }
-        .close-modal { background: var(--accent); color: #000; width: 100%; padding: 12px; border-radius: 8px; margin-top: 15px; border: none; font-weight: bold; cursor: pointer;}
-        
-        .manual-form { background: #252525; padding: 15px; border-radius: 10px; border: 1px dashed var(--accent); }
+        /* About/Readme Page */
+        .about-section { line-height: 1.7; color: #bbb; }
+        .about-section h4 { color: var(--accent); margin: 20px 0 5px 0; }
+        .about-section p { margin-top: 0; font-size: 0.95rem; }
+
         .hidden { display: none; }
-        label { font-size: 0.8rem; color: var(--accent); font-weight: bold; display: block; margin-bottom: 4px; }
+        .verse-footer { margin-top: 30px; text-align: center; font-size: 0.8rem; color: #555; font-style: italic; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h2 style="margin: 0; font-size: 1.2rem;">Prayer Tracker</h2>
-        <div class="help-icon" onclick="toggleModal(true)">?</div>
+        <h2 style="margin: 0; font-size: 1.3rem; letter-spacing: -0.5px;">Prayer Tracker <span style="color: var(--accent);">Pro</span></h2>
     </div>
 
     <div class="nav">
         <button class="btn secondary" onclick="showPage('setup')">Timer</button>
         <button class="btn secondary" onclick="showPage('manual')">Log</button>
         <button class="btn secondary" onclick="showPage('history')">History</button>
+        <button class="btn secondary" onclick="showPage('about')">About</button>
     </div>
 
     <div id="setup-page">
         <h3>Prayer Pointers</h3>
-        <textarea id="main-pointers" placeholder="Enter your prayer points here..."></textarea>
+        <textarea id="main-pointers" placeholder="What's on your heart?"></textarea>
         <div class="timer-box">
             <div id="display-time">00:00:00</div>
-            <p id="session-status" style="color: #888; margin: 5px 0;">Ready</p>
-            <div id="controls">
-                <button id="start-btn" class="btn primary" onclick="startSession()">Start Prayer</button>
-                <button id="pause-btn" class="btn secondary hidden" onclick="togglePause()">Pause</button>
-                <button id="stop-btn" class="btn stop hidden" onclick="stopSession()">Stop & Save</button>
+            <p id="session-status" style="color: #666; margin: 10px 0; font-size: 0.9rem;">Ready to begin</p>
+            <div style="display: flex; justify-content: center; gap: 10px;">
+                <button id="start-btn" class="btn primary" style="padding: 15px 30px; border-radius: 12px;" onclick="startSession()">Start Prayer</button>
+                <button id="pause-btn" class="btn secondary hidden" style="padding: 15px 20px; border-radius: 12px;" onclick="togglePause()">Pause</button>
+                <button id="stop-btn" class="btn stop hidden" style="padding: 15px 20px; border-radius: 12px;" onclick="stopSession()">End</button>
             </div>
         </div>
+        <div class="verse-footer">"Devote yourselves to prayer, being watchful and thankful." — Colossians 4:2</div>
     </div>
 
     <div id="manual-page" class="hidden">
         <h3>Manual Entry</h3>
-        <div class="manual-form">
-            <label>Start Time</label>
+        <div style="background: #1a1a1a; padding: 20px; border-radius: 15px; border: 1px solid #333;">
+            <label style="font-size: 0.7rem; color: var(--accent); font-weight: bold; display: block; margin-bottom: 5px;">START TIME</label>
             <input type="datetime-local" id="manual-start">
-            <label>End Time</label>
+            <label style="font-size: 0.7rem; color: var(--accent); font-weight: bold; display: block; margin-bottom: 5px; margin-top: 10px;">END TIME</label>
             <input type="datetime-local" id="manual-end">
-            <label>Session Pointers</label>
-            <textarea id="manual-pointers"></textarea>
+            <textarea id="manual-pointers" placeholder="What did you pray about?"></textarea>
             <button class="btn success full-width" onclick="saveManualLog()">Add to History</button>
         </div>
     </div>
@@ -134,57 +119,53 @@
             <div class="stat-card"><span id="stat-total-mins" class="stat-val">0</span><span class="stat-lbl">Total Mins</span></div>
             <div class="stat-card"><span id="stat-count" class="stat-val">0</span><span class="stat-lbl">Sessions</span></div>
         </div>
-        <h3>Records</h3>
-        <p style="font-size: 0.7rem; color: #666; margin-bottom: 8px;">Tap Date, Mins, or Pointers to edit.</p>
-        <table class="history-table"><tbody id="history-list"></tbody></table>
-        <div style="margin-top: 40px; border-top: 1px solid #333; padding-top: 15px;">
-            <button class="btn secondary full-width" onclick="exportToCSV()">📊 Export to CSV</button>
-            <button class="btn secondary full-width" onclick="backupJSON()">💾 Download JSON Backup</button>
-            <button class="btn secondary full-width" onclick="document.getElementById('importFile').click()">📂 Restore Backup</button>
+        <h3>Session History</h3>
+        <p style="font-size: 0.75rem; color: #666; margin-bottom: 15px;">Tap row to expand. Tap text to edit.</p>
+        <div id="history-list"></div>
+        
+        <div style="margin-top: 40px; border-top: 1px solid #333; padding-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+            <button class="btn secondary" style="padding: 12px;" onclick="exportToCSV()">📊 Export to CSV (Excel)</button>
+            <button class="btn secondary" style="padding: 12px;" onclick="backupJSON()">💾 Download JSON Backup</button>
+            <button class="btn secondary" style="padding: 12px;" onclick="document.getElementById('importFile').click()">📂 Restore from Backup</button>
             <input type="file" id="importFile" class="hidden" accept=".json" onchange="restoreJSON(event)">
         </div>
     </div>
-</div>
 
-<div id="help-modal">
-    <div class="modal-content">
-        <h4>App Guide</h4>
-        <p><strong>📱 Install:</strong> Tap "Share" and <b>"Add to Home Screen"</b> to use as a full-screen app.</p>
-        <p><strong>✍️ Editing:</strong> In History, you can tap and edit the date, duration, and pointers directly.</p>
-        <p><strong>🔒 Privacy:</strong> Data stays 100% on this phone in your local storage.</p>
-        <button class="close-modal" onclick="toggleModal(false)">Got it!</button>
+    <div id="about-page" class="hidden">
+        <h3>User Guide</h3>
+        <div class="about-section">
+            <h4>📱 App Installation</h4>
+            <p>This is a Progressive Web App. For the best experience, tap <strong>Share</strong> and then <strong>'Add to Home Screen'</strong>. It will look and act like a native app.</p>
+            
+            <h4>🔒 Privacy & Security</h4>
+            <p>Your data is stored <strong>locally in your browser</strong>. No cloud servers are used. To ensure you never lose your history, we recommend downloading a JSON backup monthly.</p>
+            
+            <h4>⏱️ Focus Mode</h4>
+            <p>While the timer is running, the app will attempt to keep your screen from dimming or locking (Wake Lock API).</p>
+
+            <h4>✍️ Editing Records</h4>
+            <p>Made a mistake? In the History tab, you can tap and directly edit any date, duration, or prayer note.</p>
+        </div>
     </div>
 </div>
 
 <script>
     let timerInterval, elapsedSeconds = 0, isPaused = false, startTime, wakeLock = null;
 
+    // Load Pointers
     const mainPointersEl = document.getElementById('main-pointers');
     mainPointersEl.value = localStorage.getItem('mainPointers') || "";
     mainPointersEl.addEventListener('input', () => localStorage.setItem('mainPointers', mainPointersEl.value));
 
-    // Improved Toggle Logic
-    function toggleModal(show) {
-        const modal = document.getElementById('help-modal');
-        modal.style.display = show ? 'flex' : 'none';
-    }
-
     function showPage(page) {
-        ['setup-page', 'manual-page', 'history-page'].forEach(p => {
-            document.getElementById(p).classList.add('hidden');
-        });
+        ['setup-page', 'manual-page', 'history-page', 'about-page'].forEach(p => document.getElementById(p).classList.add('hidden'));
         document.getElementById(page + '-page').classList.remove('hidden');
         if(page === 'history') loadHistory();
         if(page === 'manual') prepManualLog();
     }
 
-    async function requestWakeLock() {
-        if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} }
-    }
-
-    function releaseWakeLock() {
-        if (wakeLock) { wakeLock.release().then(() => { wakeLock = null; }); }
-    }
+    async function requestWakeLock() { if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} } }
+    function releaseWakeLock() { if (wakeLock) { wakeLock.release().then(() => { wakeLock = null; }); } }
 
     function startSession() {
         if (!isPaused) { startTime = new Date(); requestWakeLock(); }
@@ -192,7 +173,7 @@
         document.getElementById('start-btn').classList.add('hidden');
         document.getElementById('pause-btn').classList.remove('hidden');
         document.getElementById('stop-btn').classList.remove('hidden');
-        document.getElementById('session-status').innerText = "Praying...";
+        document.getElementById('session-status').innerText = "Session Active";
         timerInterval = setInterval(() => { elapsedSeconds++; updateTimerDisplay(); }, 1000);
     }
 
@@ -216,7 +197,7 @@
         document.getElementById('start-btn').classList.remove('hidden');
         document.getElementById('pause-btn').classList.add('hidden');
         document.getElementById('stop-btn').classList.add('hidden');
-        document.getElementById('session-status').innerText = "Saved!";
+        document.getElementById('session-status').innerText = "Session Saved";
     }
 
     function updateTimerDisplay() {
@@ -246,7 +227,6 @@
     function saveRecord(start, end, duration, pointers) {
         let history = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
         history.push({ id: Date.now(), start, end, duration, pointers });
-        history.sort((a, b) => new Date(b.start) - new Date(a.start));
         localStorage.setItem('prayerHistory', JSON.stringify(history));
     }
 
@@ -256,40 +236,61 @@
         const list = document.getElementById('history-list');
         list.innerHTML = "";
         let totalMins = 0;
+
         history.forEach(item => {
             totalMins += (item.duration / 60);
             const d = new Date(item.start);
-            const dateStr = d.toLocaleDateString([], {month:'short', day:'numeric', year:'numeric'});
+            const dateStr = d.toLocaleDateString([], {month:'short', day:'numeric'});
             const timeStr = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            const row = document.createElement('tr');
-            row.innerHTML = `<td>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <strong>
-                        <span class="editable-field" contenteditable="true" onblur="updateField(${item.id}, 'startDate', this.innerText)">${dateStr}</span>, 
-                        <span class="editable-field" contenteditable="true" onblur="updateField(${item.id}, 'startTime', this.innerText)">${timeStr}</span>
-                    </strong>
-                    <span><span class="editable-field" contenteditable="true" onblur="updateField(${item.id}, 'duration', this.innerText)">${Math.round(item.duration / 60)}</span>m 
-                    <button class="btn" style="color:var(--error); padding:0 5px;" onclick="deleteRecord(${item.id})">✕</button></span>
+            
+            const itemEl = document.createElement('div');
+            itemEl.className = "history-row";
+            itemEl.innerHTML = `
+                <div class="row-summary" onclick="toggleRow(${item.id})">
+                    <div>
+                        <strong contenteditable="true" onclick="event.stopPropagation()" onblur="updateField(${item.id}, 'startDate', this.innerText)">${dateStr}</strong>, 
+                        <span style="color:#777" contenteditable="true" onclick="event.stopPropagation()" onblur="updateField(${item.id}, 'startTime', this.innerText)">${timeStr}</span>
+                    </div>
+                    <div style="font-weight:bold; color:var(--success)">
+                        <span contenteditable="true" onclick="event.stopPropagation()" onblur="updateField(${item.id}, 'duration', this.innerText)">${Math.round(item.duration / 60)}</span>m
+                    </div>
                 </div>
-                <div class="pointer-cell editable-field" contenteditable="true" onblur="updateField(${item.id}, 'pointers', this.innerText)">${item.pointers}</div>
-            </td>`;
-            list.appendChild(row);
+                <div id="container-${item.id}" class="pointer-container">
+                    <div class="pointer-cell" contenteditable="true" onblur="updateField(${item.id}, 'pointers', this.innerText)">${item.pointers || "No notes..."}</div>
+                    <div class="action-bar">
+                        <button class="action-btn" onclick="copyToClipboard('${item.id}')">📋 Copy</button>
+                        <button class="action-btn" style="background:#422;" onclick="deleteRecord(${item.id})">🗑️ Delete</button>
+                    </div>
+                </div>
+            `;
+            list.appendChild(itemEl);
         });
         document.getElementById('stat-total-mins').innerText = Math.floor(totalMins);
         document.getElementById('stat-count').innerText = history.length;
+    }
+
+    function toggleRow(id) { document.getElementById(`container-${id}`).classList.toggle('expanded'); }
+
+    function copyToClipboard(id) {
+        const text = document.querySelector(`#container-${id} .pointer-cell`).innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.querySelector(`#container-${id} .action-btn`);
+            const oldText = btn.innerText;
+            btn.innerText = "✅ Copied!";
+            setTimeout(() => { btn.innerText = oldText; }, 2000);
+        });
     }
 
     function updateField(id, field, val) {
         let history = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
         const i = history.findIndex(h => h.id === id);
         if(i === -1) return;
-
         if(field === 'pointers') history[i].pointers = val;
         if(field === 'duration') history[i].duration = parseInt(val) * 60 || 0;
         if(field === 'startDate' || field === 'startTime') {
             const current = new Date(history[i].start);
             if(field === 'startDate') {
-                const newD = new Date(val);
+                const newD = new Date(val + ", " + current.getFullYear());
                 if(!isNaN(newD)) current.setFullYear(newD.getFullYear(), newD.getMonth(), newD.getDate());
             } else {
                 const t = val.match(/(\d+):(\d+)\s*(AM|PM)?/i);
@@ -303,11 +304,10 @@
             history[i].start = current.toISOString();
         }
         localStorage.setItem('prayerHistory', JSON.stringify(history));
-        loadHistory();
     }
 
     function deleteRecord(id) {
-        if(confirm("Delete record?")) {
+        if(confirm("Permanently delete this record?")) {
             let history = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
             localStorage.setItem('prayerHistory', JSON.stringify(history.filter(h => h.id !== id)));
             loadHistory();
@@ -316,20 +316,18 @@
 
     function exportToCSV() {
         let history = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
-        let csv = "Start,Minutes,Pointers\n" + history.map(i => `${new Date(i.start).toLocaleString().replace(/,/g,'')},${Math.round(i.duration/60)},"${i.pointers.replace(/"/g,'""')}"`).join("\n");
-        const blob = new Blob([csv], {type:'text/csv'});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'prayer_log.csv'; a.click();
+        let csv = "Start,Minutes,Pointers\n" + history.map(i => `${new Date(i.start).toLocaleString().replace(/,/g,'')},${Math.round(i.duration/60)},"${(i.pointers||'').replace(/"/g,'""')}"`).join("\n");
+        const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'})); a.download = 'prayer_export.csv'; a.click();
     }
 
     function backupJSON() {
-        const blob = new Blob([localStorage.getItem('prayerHistory') || "[]"], {type:'application/json'});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'prayer_backup.json'; a.click();
+        const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([localStorage.getItem('prayerHistory') || "[]"], {type:'application/json'})); a.download = 'prayer_backup.json'; a.click();
     }
 
     function restoreJSON(event) {
         const reader = new FileReader();
         reader.onload = e => {
-            if(confirm("Merge history?")) {
+            if(confirm("Merge this file with your existing history?")) {
                 let current = JSON.parse(localStorage.getItem('prayerHistory') || "[]");
                 let imported = JSON.parse(e.target.result);
                 let merged = [...imported, ...current].filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
