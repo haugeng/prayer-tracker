@@ -14,7 +14,7 @@ A lightweight, private, and distraction-free web app designed to help you track 
 * **Statistics:** View your total prayer minutes and session counts at a glance.
 * **Data Portability:** Export your history to **CSV** (for Excel) or **JSON** (for backups/restoring on other devices).
 
-## 🔒 Privacy First
+## 🔒 Privacy
 This app uses **Browser Local Storage**. 
 * Your data is **never** sent to a server or stored on GitHub. 
 * It stays 100% on your device. 
