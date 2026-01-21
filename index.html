@@ -34,7 +34,6 @@
             box-sizing: border-box; font-size: 16px; margin-bottom: 12px;
         }
         #main-pointers { height: 264px; resize: none; line-height: 1.5; }
-        #manual-pointers { height: 240px; }
 
         .timer-box {
             background: linear-gradient(145deg, #1e1e1e, #222);
@@ -56,9 +55,12 @@
         .stat-lbl { font-size: 0.65rem; color: #888; text-transform: uppercase; }
 
         .history-row { border-bottom: 1px solid #222; }
-        .row-summary { display: flex; justify-content: space-between; align-items: center; padding: 16px 5px; cursor: pointer; }
-        .row-summary > div:first-child { display: flex; gap: 4px; }
+        .row-summary { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; cursor: default; }
         
+        /* Tap Logic Classes */
+        .toggle-zone { flex-grow: 1; height: 40px; cursor: pointer; }
+        .edit-pill { background: #252525; padding: 2px 6px; border-radius: 4px; border: 1px solid #333; }
+
         .pointer-container { max-height: 0; overflow: hidden; transition: all 0.3s ease; background: #161616; border-radius: 10px; }
         .pointer-container.expanded { max-height: 1000px; padding: 15px; margin-bottom: 15px; border: 1px solid #333; }
         .pointer-cell { white-space: pre-wrap; color: #ccc; outline: none; font-style: italic; line-height: 1.6; font-size: 14px; }
@@ -70,7 +72,6 @@
         .about-section h4 { color: var(--accent); margin: 20px 0 5px 0; }
         .intro-text { color: var(--text); font-size: 0.95rem; margin-bottom: 25px; opacity: 0.9; }
         .hidden { display: none; }
-        .verse-footer { margin-top: 30px; text-align: center; font-size: 0.8rem; color: #555; font-style: italic; }
     </style>
 </head>
 <body>
@@ -99,7 +100,6 @@
                 <button id="stop-btn" class="btn stop hidden" style="padding: 15px 20px; border-radius: 12px;" onclick="stopSession()">End</button>
             </div>
         </div>
-        <div class="verse-footer">"Pray without ceasing." — 1 Thess 5:17</div>
     </div>
 
     <div id="manual-page" class="hidden">
@@ -121,7 +121,7 @@
             <div class="stat-card"><span id="stat-count" class="stat-val">0</span><span class="stat-lbl">Sessions</span></div>
         </div>
         <h3>Records</h3>
-        <p style="font-size: 0.75rem; color: #666; margin-bottom: 15px;">Tap space to expand. Tap text to edit.</p>
+        <p style="font-size: 0.75rem; color: #666; margin-bottom: 15px;">Tap space to expand. Tap pills to edit.</p>
         <div id="history-list"></div>
         
         <div style="margin-top: 40px; border-top: 1px solid #333; padding-top: 20px; display: flex; flex-direction: column; gap: 10px;">
@@ -138,7 +138,7 @@
             <p class="intro-text">A lightweight, private, and distraction-free web app designed to help you track your prayer sessions and keep a digital journal of your prayer pointers.</p>
             
             <h4>📖 Manual Logging</h4>
-            <p>Missed a session? Use the <strong>Log</strong> tab to backdate entries. Simply select your start and end times, paste your pointers, and save. The app will automatically calculate the duration for you.</p>
+            <p>Missed a session? Use the <strong>Log</strong> tab to backdate entries. Simply select your start and end times, paste your pointers, and save.</p>
 
             <h4>📲 Transferring Data</h4>
             <p>To move your data to a new phone or browser:</p>
@@ -152,7 +152,7 @@
             <p>Your data is stored <strong>locally</strong> in your browser's memory. It never touches a server. Please backup regularly to avoid data loss if you clear your browser cache.</p>
             
             <h4>📱 Install as App</h4>
-            <p>Tap <strong>Share</strong> (iOS) or <strong>Menu</strong> (Android) and select <strong>'Add to Home Screen'</strong> to use this without the browser address bar.</p>
+            <p>Tap <strong>Share</strong> (iOS) or <strong>Menu</strong> (Android) and select <strong>'Add to Home Screen'</strong>.</p>
         </div>
         <button class="btn secondary full-width" style="margin-top:20px;" onclick="showPage('setup')">Back to App</button>
     </div>
@@ -220,7 +220,6 @@
         const fmt = d => new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
         document.getElementById('manual-start').value = fmt(new Date(now - 1800000));
         document.getElementById('manual-end').value = fmt(now);
-        document.getElementById('manual-pointers').value = mainPointersEl.value;
     }
 
     function saveManualLog() {
@@ -254,13 +253,14 @@
             const itemEl = document.createElement('div');
             itemEl.className = "history-row";
             itemEl.innerHTML = `
-                <div class="row-summary" onclick="toggleRow(${item.id})">
-                    <div style="flex-grow: 1;">
-                        <span style="font-weight:bold;" contenteditable="true" onclick="event.stopPropagation()" onblur="updateField(${item.id}, 'startDate', this.innerText)">${dateStr}</span>, 
-                        <span style="color:#777" contenteditable="true" onclick="event.stopPropagation()" onblur="updateField(${item.id}, 'startTime', this.innerText)">${timeStr}</span>
+                <div class="row-summary">
+                    <div style="display:flex; gap:5px;">
+                        <span class="edit-pill" contenteditable="true" onblur="updateField(${item.id}, 'startDate', this.innerText)">${dateStr}</span>
+                        <span class="edit-pill" style="color:#777" contenteditable="true" onblur="updateField(${item.id}, 'startTime', this.innerText)">${timeStr}</span>
                     </div>
+                    <div class="toggle-zone" onclick="toggleRow(${item.id})"></div>
                     <div style="font-weight:bold; color:var(--success); min-width: 60px; text-align: right;">
-                        <span contenteditable="true" onclick="event.stopPropagation()" onblur="updateField(${item.id}, 'duration', this.innerText)">${Math.round(item.duration / 60)}</span>m
+                        <span class="edit-pill" contenteditable="true" onblur="updateField(${item.id}, 'duration', this.innerText)">${Math.round(item.duration / 60)}</span>m
                     </div>
                 </div>
                 <div id="container-${item.id}" class="pointer-container">
