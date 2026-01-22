@@ -4,15 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>My Prayer Tracker</title>
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="mobile-web-app-capable" content="yes">
-    <link rel="manifest" href="data:application/manifest+json,{%22display%22:%22standalone%22,%22name%22:%22Prayer%20Tracker%22,%22short_name%22:%22Prayer%22}">
-
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23bb86fc'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-family='sans-serif' font-size='60' fill='black' font-weight='bold'>P</text></svg>">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23bb86fc'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-family='sans-serif' font-size='60' fill='black' font-weight='bold'>P</text></svg>">
-    
     <style>
         :root {
             --bg: #121212; --card: #1e1e1e; --text: #e0e0e0;
@@ -83,7 +74,7 @@
     </div>
     <div id="setup-page">
         <h3>Prayer & Reflections</h3>
-        <textarea id="main-pointers" spellcheck="true" autocorrect="off" autocomplete="off" autocapitalize="sentences" inputmode="text" placeholder="Enter your pointers, thoughts, or reflections here..."></textarea>
+        <textarea id="main-pointers" placeholder="Enter your pointers, thoughts, or reflections here..." spellcheck="true" autocorrect="off" autocomplete="off" autocapitalize="sentences"></textarea>
         <div class="timer-box">
             <div id="display-time">00:00:00</div>
             <p id="session-status" style="color: #666; margin: 10px 0; font-size: 0.9rem;">Ready</p>
@@ -102,7 +93,7 @@
             <input type="datetime-local" id="manual-start">
             <label style="font-size: 0.7rem; color: var(--accent); font-weight: bold;">END TIME</label>
             <input type="datetime-local" id="manual-end">
-            <textarea id="manual-pointers" spellcheck="true" autocorrect="off" autocomplete="off" autocapitalize="sentences" inputmode="text" placeholder="Notes for this session..."></textarea>
+            <textarea id="manual-pointers" placeholder="Notes for this session..." spellcheck="true" autocorrect="off" autocomplete="off" autocapitalize="sentences"></textarea>
             <button class="btn success full-width" onclick="saveManualLog()">Add to History</button>
         </div>
     </div>
@@ -113,6 +104,7 @@
             <div class="stat-card"><span id="stat-count" class="stat-val">0</span><span class="stat-lbl">Sessions</span></div>
         </div>
         <h3>Records</h3>
+        <p style="font-size: 0.75rem; color: #666; margin-bottom: 15px;">Tap space to expand. Tap pills to edit.</p>
         <div id="history-list"></div>
         <div style="margin-top: 40px; border-top: 1px solid #333; padding-top: 20px; display: flex; flex-direction: column; gap: 10px;">
             <button class="btn secondary" onclick="exportToCSV()">📊 Export to CSV</button>
@@ -124,17 +116,19 @@
     <div id="about-page" class="hidden">
         <h3>User Guide</h3>
         <div style="line-height: 1.7; color: #bbb;">
-            <p style="color: var(--text); font-size: 0.95rem; margin-bottom: 25px;">A private, distraction-free tracker for your prayer life.</p>
-            <h4 style="color:var(--accent); margin-bottom:5px;">📖 Tips</h4>
-            <p>• Use the <strong>Log</strong> tab to add sessions you forgot to track live.<br>
-               • Export to <strong>CSV</strong> to view your prayers in Excel or Google Sheets.</p>
+            <p style="color: var(--text); font-size: 0.95rem; margin-bottom: 25px; opacity: 0.9; line-height: 1.6;">A lightweight, private, and distraction-free web app designed to help you track your prayer sessions and keep a digital journal of your prayer pointers.</p>
+            <h4 style="color:var(--accent); margin-bottom:5px;">📖 Manual Logging</h4>
+            <p>Missed a session? Use the <strong>Log</strong> tab to backdate entries. Simply select your start and end times, paste your pointers, and save.</p>
+            <h4 style="color:var(--accent); margin-bottom:5px;">📲 Transferring Data</h4>
+            <p>To move data: History > <strong>Download JSON Backup</strong>. On the new device, use <strong>Restore from Backup</strong>.</p>
             <h4 style="color:var(--accent); margin-bottom:5px;">🔒 Privacy</h4>
-            <p>Data is stored only in your browser. Backup regularly to avoid data loss.</p>
+            <p>Data stays on your device. Auto-saves every 10 seconds during active sessions to prevent data loss. Please backup regularly.</p>
+            <h4 style="color:var(--accent); margin-bottom:5px;">📱 Install as App</h4>
+            <p>Tap <strong>Share</strong> (iOS) or <strong>Menu</strong> (Android) and select <strong>'Add to Home Screen'</strong>.</p>
         </div>
         <button class="btn secondary full-width" style="margin-top:20px;" onclick="showPage('setup')">Back to App</button>
     </div>
 </div>
-
 <script>
     const db = {
         getHistory: () => JSON.parse(localStorage.getItem('prayerHistory') || "[]"),
@@ -144,17 +138,46 @@
         setLastBackup: () => localStorage.setItem('lastBackupDate', Date.now()),
         getLastBackup: () => localStorage.getItem('lastBackupDate') || 0
     };
-    
-    let timerInterval, elapsedSeconds = 0, isPaused = false, startTime, wakeLock = null;
+
+    // Clock-based timer variables
+    let timerInterval = null;
+    let sessionStartTime = null;  // Timestamp when session started
+    let pausedDuration = 0;       // Total time spent paused (in milliseconds)
+    let pauseStartTime = null;    // Timestamp when pause started
+    let wakeLock = null;
+    let autoSaveInterval = null;
+
     const mainPointersEl = document.getElementById('main-pointers');
     mainPointersEl.value = db.getPointers();
     mainPointersEl.addEventListener('input', () => db.savePointers(mainPointersEl.value));
 
-    // Force UI refresh when returning to tab
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible' && startTime && !isPaused) {
-            elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
-            updateTimerDisplay();
+    // Check for interrupted session on page load
+    window.addEventListener('load', () => {
+        const saved = localStorage.getItem('activeSession');
+        if (saved) {
+            try {
+                const session = JSON.parse(saved);
+                const startTime = new Date(session.start);
+                const now = Date.now();
+                const elapsed = Math.floor((now - startTime - session.pausedDuration) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                
+                if (confirm(`Found interrupted session from ${startTime.toLocaleString()}.\n\nRecovered ${minutes} minute${minutes !== 1 ? 's' : ''}.\n\nSave this session?`)) {
+                    const history = db.getHistory();
+                    history.push({
+                        id: now,
+                        start: session.start,
+                        end: new Date(now).toISOString(),
+                        duration: elapsed,
+                        pointers: session.pointers
+                    });
+                    db.saveHistory(history);
+                    alert('Session saved successfully!');
+                }
+            } catch (e) {
+                console.error('Error recovering session:', e);
+            }
+            localStorage.removeItem('activeSession');
         }
     });
 
@@ -171,67 +194,132 @@
         if(pageId === 'manual') prepManualLog();
     }
 
-    async function requestWakeLock() { if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} } }
-    function releaseWakeLock() { if (wakeLock) { wakeLock.release().then(() => wakeLock = null); } }
+    async function requestWakeLock() { 
+        if ('wakeLock' in navigator) { 
+            try { 
+                wakeLock = await navigator.wakeLock.request('screen'); 
+            } catch (err) {} 
+        } 
+    }
+
+    function releaseWakeLock() { 
+        if (wakeLock) { 
+            wakeLock.release().then(() => wakeLock = null); 
+        } 
+    }
+
+    function saveSessionState() {
+        if (sessionStartTime) {
+            const sessionState = {
+                start: new Date(sessionStartTime).toISOString(),
+                pausedDuration: pausedDuration,
+                pauseStart: pauseStartTime,
+                pointers: mainPointersEl.value
+            };
+            localStorage.setItem('activeSession', JSON.stringify(sessionState));
+        }
+    }
 
     function startSession() {
-        if (!isPaused) { 
-            startTime = Date.now(); 
-            requestWakeLock(); 
-        } else {
-            // Resume: recalculate start time based on how much was already completed
-            startTime = Date.now() - (elapsedSeconds * 1000);
+        if (!sessionStartTime) {
+            // New session
+            sessionStartTime = Date.now();
+            pausedDuration = 0;
+            requestWakeLock();
+        } else if (pauseStartTime) {
+            // Resuming from pause
+            pausedDuration += Date.now() - pauseStartTime;
+            pauseStartTime = null;
+            requestWakeLock();
         }
         
-        isPaused = false;
         document.getElementById('start-btn').classList.add('hidden');
         ['pause-btn', 'stop-btn'].forEach(id => document.getElementById(id).classList.remove('hidden'));
-        document.getElementById('pause-btn').innerText = "Pause";
         document.getElementById('session-status').innerText = "Session Active";
         
-        if (timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(() => { 
-            elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
-            updateTimerDisplay(); 
-        }, 1000);
+        // Update display immediately and frequently for accuracy
+        updateTimerDisplay();
+        timerInterval = setInterval(updateTimerDisplay, 100); // Update every 100ms for smoother display
+        
+        // Auto-save every 10 seconds
+        autoSaveInterval = setInterval(saveSessionState, 10000);
+        
+        saveSessionState(); // Save immediately on start
     }
 
     function togglePause() {
-        if (!isPaused) {
-            clearInterval(timerInterval); 
-            isPaused = true;
+        if (!pauseStartTime) {
+            // Pause
+            pauseStartTime = Date.now();
+            clearInterval(timerInterval);
+            clearInterval(autoSaveInterval);
             document.getElementById('pause-btn').innerText = "Resume";
             document.getElementById('session-status').innerText = "Paused";
             releaseWakeLock();
-        } else { 
-            startSession(); 
+            saveSessionState();
+        } else {
+            // Resume
+            document.getElementById('pause-btn').innerText = "Pause";
+            startSession();
         }
     }
 
     function stopSession() {
         clearInterval(timerInterval);
+        clearInterval(autoSaveInterval);
+        
+        const endTime = Date.now();
+        const totalDuration = Math.floor((endTime - sessionStartTime - pausedDuration) / 1000);
+        
         const history = db.getHistory();
         history.push({ 
-            id: Date.now(), 
-            start: new Date(startTime).toISOString(), 
-            end: new Date().toISOString(), 
-            duration: elapsedSeconds, 
+            id: endTime, 
+            start: new Date(sessionStartTime).toISOString(), 
+            end: new Date(endTime).toISOString(), 
+            duration: totalDuration, 
             pointers: mainPointersEl.value 
         });
         db.saveHistory(history);
+        
         releaseWakeLock();
-        elapsedSeconds = 0; isPaused = false; startTime = null;
+        localStorage.removeItem('activeSession');
+        
+        // Reset state
+        sessionStartTime = null;
+        pausedDuration = 0;
+        pauseStartTime = null;
+        
         updateTimerDisplay();
         document.getElementById('start-btn').classList.remove('hidden');
         ['pause-btn', 'stop-btn'].forEach(id => document.getElementById(id).classList.add('hidden'));
         document.getElementById('session-status').innerText = "Saved";
+        document.getElementById('pause-btn').innerText = "Pause";
     }
 
     function updateTimerDisplay() {
-        const h = Math.floor(elapsedSeconds / 3600).toString().padStart(2, '0');
-        const m = Math.floor((elapsedSeconds % 3600) / 60).toString().padStart(2, '0');
-        const s = (elapsedSeconds % 60).toString().padStart(2, '0');
-        document.getElementById('display-time').innerText = `${h}:${m}:${s}`;
+        let elapsed;
+        
+        if (pauseStartTime) {
+            // Currently paused - freeze at pause time
+            elapsed = Math.floor((pauseStartTime - sessionStartTime - pausedDuration) / 1000);
+        } else if (sessionStartTime) {
+            // Active - calculate from current time
+            elapsed = Math.floor((Date.now() - sessionStartTime - pausedDuration) / 1000);
+        } else {
+            elapsed = 0;
+        }
+        
+        const h = Math.floor(elapsed / 3600).toString().padStart(2, '0');
+        const m = Math.floor((elapsed % 3600) / 60).toString().padStart(2, '0');
+        const s = (elapsed % 60).toString().padStart(2, '0');
+        
+        const newDisplay = `${h}:${m}:${s}`;
+        const displayEl = document.getElementById('display-time');
+        
+        // Only update DOM if value changed (performance optimization)
+        if (displayEl.innerText !== newDisplay) {
+            displayEl.innerText = newDisplay;
+        }
     }
 
     function prepManualLog() {
@@ -276,7 +364,7 @@
                     </div>
                 </div>
                 <div id="container-${item.id}" class="pointer-container">
-                    <div class="pointer-cell" contenteditable="true" spellcheck="true" onblur="updateField(${item.id}, 'pointers', this.innerText)">${item.pointers || "No notes..."}</div>
+                    <div class="pointer-cell" contenteditable="true" spellcheck="true" autocorrect="off" onblur="updateField(${item.id}, 'pointers', this.innerText)">${item.pointers || "No notes..."}</div>
                     <div class="action-bar">
                         <button class="action-btn" onclick="copyToClipboard('${item.id}')">📋 Copy</button>
                         <button class="action-btn" style="background:#422;" onclick="deleteRecord(${item.id})">🗑️ Delete</button>
@@ -290,6 +378,7 @@
     }
 
     function toggleRow(id) { document.getElementById(`container-${id}`).classList.toggle('expanded'); }
+
     function copyToClipboard(id) {
         const text = document.querySelector(`#container-${id} .pointer-cell`).innerText;
         navigator.clipboard.writeText(text).then(() => alert("Copied!"));
@@ -326,7 +415,7 @@
     function checkBackupReminder() {
         const thirtyDays = 30 * 24 * 60 * 60 * 1000;
         if (Date.now() - db.getLastBackup() > thirtyDays) {
-            setTimeout(() => { if(confirm("Backup Reminder: Download JSON backup?")) backupJSON(); }, 500);
+            setTimeout(() => { if(confirm("Backup Reminder: It's been a month since your last backup. Download now?")) backupJSON(); }, 500);
         }
     }
 
@@ -341,7 +430,7 @@
     function restoreJSON(e) {
         const r = new FileReader();
         r.onload = ev => {
-            if(confirm("Merge history?")) {
+            if(confirm("Merge with existing history?")) {
                 let merged = [...JSON.parse(ev.target.result), ...db.getHistory()].filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
                 db.saveHistory(merged); loadHistory();
             }
@@ -362,11 +451,10 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download ='prayer_log_$(new Datel().tolSOString().slice(0,10).csv';
+        a.download = `prayer_log_${new Date().toISOString().slice(0,10)}.csv`;
         document.body.appendChild(a);
         a.click();
-        setTimeout(() => document.bodv.removeChild(a);
-        window.URL.revokeObiectURL(url); }, 100);
+        setTimeout(() => { document.body.removeChild(a); window.URL.revokeObjectURL(url); }, 100);
     }
 </script>
 </body>
