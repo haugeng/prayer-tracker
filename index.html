@@ -169,6 +169,14 @@
     mainPointersEl.value = db.getPointers();
     mainPointersEl.addEventListener('input', () => db.savePointers(mainPointersEl.value));
 
+    // CLOCK MATH FIX: Snaps UI to real time when user returns to app
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && startTime && !isPaused) {
+            elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+            updateTimerDisplay();
+        }
+    });
+
     function showPage(pageId) {
         ['setup', 'manual', 'history', 'about'].forEach(id => {
             document.getElementById(id + '-page').classList.add('hidden');
@@ -187,12 +195,24 @@
     function releaseWakeLock() { if (wakeLock) { wakeLock.release().then(() => wakeLock = null); } }
 
     function startSession() {
-        if (!isPaused) { startTime = new Date(); requestWakeLock(); }
+        if (!isPaused) { 
+            startTime = Date.now(); // Record start timestamp
+            requestWakeLock(); 
+        } else {
+            // Adjust startTime to account for duration already elapsed before pause
+            startTime = Date.now() - (elapsedSeconds * 1000);
+        }
         isPaused = false;
         document.getElementById('start-btn').classList.add('hidden');
         ['pause-btn', 'stop-btn'].forEach(id => document.getElementById(id).classList.remove('hidden'));
         document.getElementById('session-status').innerText = "Session Active";
-        timerInterval = setInterval(() => { elapsedSeconds++; updateTimerDisplay(); }, 1000);
+        
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => { 
+            // Calculate elapsed time from the source of truth (system clock)
+            elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+            updateTimerDisplay(); 
+        }, 1000);
     }
 
     function togglePause() {
@@ -202,17 +222,24 @@
             document.getElementById('session-status').innerText = "Paused";
             releaseWakeLock();
         } else {
-            document.getElementById('pause-btn').innerText = "Pause"; startSession();
+            document.getElementById('pause-btn').innerText = "Pause"; 
+            startSession();
         }
     }
 
     function stopSession() {
         clearInterval(timerInterval);
         const history = db.getHistory();
-        history.push({ id: Date.now(), start: startTime.toISOString(), end: new Date().toISOString(), duration: elapsedSeconds, pointers: mainPointersEl.value });
+        history.push({ 
+            id: Date.now(), 
+            start: new Date(startTime).toISOString(), 
+            end: new Date().toISOString(), 
+            duration: elapsedSeconds, 
+            pointers: mainPointersEl.value 
+        });
         db.saveHistory(history);
         releaseWakeLock();
-        elapsedSeconds = 0; isPaused = false;
+        elapsedSeconds = 0; isPaused = false; startTime = null;
         updateTimerDisplay();
         document.getElementById('start-btn').classList.remove('hidden');
         ['pause-btn', 'stop-btn'].forEach(id => document.getElementById(id).classList.add('hidden'));
@@ -379,8 +406,6 @@
             window.URL.revokeObjectURL(url);
         }, 100);
     }
-
-    
 </script>
 </body>
 </html>
