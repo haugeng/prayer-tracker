@@ -90,7 +90,7 @@
         <div id="recovery-details" style="font-family: monospace; color: var(--success); margin: 15px 0; font-size: 1.5rem;">00:00:00</div>
         <div style="display: flex; flex-direction: column; gap: 10px;">
             <button class="btn primary" onclick="handleRecovery('resume')">Resume & Catch Up</button>
-            <button class="btn success" onclick="handleRecovery('save')">Save Last Snaphot</button>
+            <button class="btn success" onclick="handleRecovery('save')">Save to History</button>
             <button class="btn secondary" style="background: #422;" onclick="handleRecovery('discard')">Discard Session</button>
         </div>
     </div>
@@ -152,8 +152,14 @@
 
     <div id="about-page" class="hidden">
         <h3>User Guide</h3>
-        <p>Private web app for tracking prayer. Your reflections auto-save as you type.</p>
-        <button class="btn secondary full-width" onclick="showPage('setup')">Back</button>
+        <div style="line-height: 1.6; color: #bbb; font-size: 0.95rem;">
+            <p><strong>Privacy:</strong> All your data is stored locally on your device's browser. No data is sent to a server.</p>
+            <p><strong>Timer:</strong> Anchored to real-world time. Even if you close the app, you can "Resume & Catch Up" to the correct duration.</p>
+            <p><strong>Auto-Save:</strong> Your reflections in the Timer page save every 10 seconds while the session is active.</p>
+            <p><strong>Manual Entry:</strong> Forgot to start the timer? Use the Log tab to record past sessions manually.</p>
+            <p><strong>Backups:</strong> Use the History tab to download a JSON file. Keep this safe as clearing your browser cache may delete your data.</p>
+        </div>
+        <button class="btn secondary full-width" style="margin-top:20px;" onclick="showPage('setup')">Back to App</button>
     </div>
 </div>
 
@@ -179,8 +185,6 @@
         if (saved && saved.startTime) {
             const startDate = new Date(saved.startTime);
             document.getElementById('recovery-timestamp').innerText = `Started: ${startDate.toLocaleDateString()} ${startDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
-            
-            // Show the duration recorded at the last heartbeat
             const h = Math.floor(saved.elapsed / 3600).toString().padStart(2, '0');
             const m = Math.floor((saved.elapsed % 3600) / 60).toString().padStart(2, '0');
             const s = (saved.elapsed % 60).toString().padStart(2, '0');
@@ -192,9 +196,7 @@
     function handleRecovery(choice) {
         const saved = db.getActiveSession();
         document.getElementById('recovery-overlay').classList.add('hidden');
-        
         if (choice === 'resume') {
-            // Anchor logic: Re-sync to the original start time
             startTime = saved.startTime;
             elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
             mainPointersEl.value = saved.pointers;
@@ -236,13 +238,11 @@
         document.getElementById('start-btn').classList.add('hidden');
         ['pause-btn', 'stop-btn'].forEach(id => document.getElementById(id).classList.remove('hidden'));
         document.getElementById('session-status').innerText = "Session Active";
-        
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => { 
             elapsedSeconds = Math.floor((Date.now() - startTime) / 1000); 
             updateTimerDisplay(); 
         }, 1000);
-        
         if (autosaveInterval) clearInterval(autosaveInterval);
         autosaveInterval = setInterval(() => {
             db.setActiveSession({ startTime, elapsed: elapsedSeconds, pointers: mainPointersEl.value });
