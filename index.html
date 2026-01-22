@@ -15,78 +15,53 @@
             margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center;
         }
         .container { width: 100%; max-width: 500px; padding-bottom: 50px; }
-        
         .header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .help-icon { 
             background: #333; color: var(--text); width: 32px; height: 32px; 
             border-radius: 50%; display: flex; align-items: center; justify-content: center; 
             font-weight: bold; cursor: pointer; border: 1px solid #444; font-size: 18px;
         }
-
         .nav { display: flex; width: 100%; gap: 8px; margin-bottom: 20px; position: sticky; top: 0; background: var(--bg); z-index: 10; padding: 5px 0; }
         .nav button { flex: 1; padding: 12px 5px; font-size: 14px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
         .nav .active { background: var(--accent); color: #000; }
         .secondary { background: #2a2a2a; color: white; }
-
         h3 { border-bottom: 1px solid #333; padding-bottom: 8px; margin-top: 10px; font-size: 1.1rem; }
-        
         textarea, input {
             width: 100%; background: var(--card); color: var(--text);
             border: 1px solid #444; border-radius: 12px; padding: 14px;
             box-sizing: border-box; font-size: 16px; margin-bottom: 12px;
         }
         #main-pointers { height: 264px; resize: none; line-height: 1.5; }
-
-        .timer-box {
-            background: linear-gradient(145deg, #1e1e1e, #222);
-            padding: 30px 20px; border-radius: 20px; text-align: center;
-            margin: 15px 0; border: 1px solid #333;
-        }
+        .timer-box { background: linear-gradient(145deg, #1e1e1e, #222); padding: 30px 20px; border-radius: 20px; text-align: center; margin: 15px 0; border: 1px solid #333; }
         #display-time { font-size: 3.5rem; font-weight: bold; font-family: monospace; color: var(--accent); }
-        
         .btn { border: none; font-weight: bold; cursor: pointer; padding: 15px; border-radius: 12px; }
         .primary { background: var(--accent); color: #000; }
         .stop { background: var(--error); color: white; }
         .success { background: var(--success); color: #000; }
         .full-width { width: 100%; margin-top: 10px; }
-
-        /* Recovery Modal */
-        #recovery-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 100;
-            display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;
-        }
-        .recovery-card {
-            background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid var(--accent);
-            text-align: center; max-width: 400px; width: 100%;
-        }
-
+        #recovery-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        .recovery-card { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid var(--accent); text-align: center; max-width: 400px; width: 100%; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
         .stat-card { background: var(--card); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #333; }
         .stat-val { display: block; font-size: 1.4rem; font-weight: bold; color: var(--success); }
         .stat-lbl { font-size: 0.65rem; color: #888; text-transform: uppercase; }
-
         .history-row { border-bottom: 1px solid #222; }
         .row-summary { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; }
         .toggle-zone { flex-grow: 1; align-self: stretch; cursor: pointer; min-width: 20px; }
-        .edit-pill { background: #252525; padding: 3px 8px; border-radius: 6px; border: 1px solid #333; font-size: 0.9rem; }
-
         .pointer-container { max-height: 0; overflow: hidden; transition: all 0.3s ease; background: #161616; border-radius: 10px; }
         .pointer-container.expanded { max-height: 1000px; padding: 15px; margin-bottom: 15px; border: 1px solid #333; }
         .pointer-cell { white-space: pre-wrap; color: #ccc; outline: none; font-style: italic; line-height: 1.6; font-size: 14px; }
-        
         .action-bar { display: flex; gap: 10px; margin-top: 15px; padding-top: 12px; border-top: 1px solid #333; }
         .action-btn { background: #333; color: #eee; font-size: 11px; padding: 8px 12px; border-radius: 6px; border: none; flex: 1; }
-        .verse-footer { margin-top: 30px; text-align: center; font-size: 0.8rem; color: #555; font-style: italic; }
-        .hidden { display: none; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
 <div id="recovery-overlay" class="hidden">
     <div class="recovery-card">
-        <h2 style="color: var(--accent); margin-top: 0;">Incomplete Session</h2>
-        <p>A session was interrupted. Keep the progress?</p>
+        <h2 style="color: var(--accent); margin-top: 0;">Unfinished Session</h2>
+        <p>Would you like to keep the previous timer progress?</p>
         <div id="recovery-details" style="font-family: monospace; color: var(--success); margin: 15px 0; font-size: 1.5rem;">00:00:00</div>
         <div style="display: flex; flex-direction: column; gap: 10px;">
             <button class="btn primary" onclick="handleRecovery('resume')">Resume Session</button>
@@ -110,7 +85,7 @@
 
     <div id="setup-page">
         <h3>Prayer & Reflections</h3>
-        <textarea id="main-pointers" placeholder="Enter your pointers, thoughts, or reflections here..."></textarea>
+        <textarea id="main-pointers" placeholder="Enter reflections here..."></textarea>
         <div class="timer-box">
             <div id="display-time">00:00:00</div>
             <p id="session-status" style="color: #666; margin: 10px 0; font-size: 0.9rem;">Ready</p>
@@ -120,17 +95,16 @@
                 <button id="stop-btn" class="btn stop hidden" onclick="stopSession()">End</button>
             </div>
         </div>
-        <div class="verse-footer">"Pray without ceasing." — 1 Thess 5:17</div>
     </div>
 
     <div id="manual-page" class="hidden">
         <h3>Manual Entry</h3>
         <div style="background: #1a1a1a; padding: 20px; border-radius: 15px; border: 1px solid #333;">
-            <label style="font-size: 0.7rem; color: var(--accent); font-weight: bold;">START TIME</label>
+            <label style="font-size: 0.7rem; color: var(--accent);">START TIME</label>
             <input type="datetime-local" id="manual-start">
-            <label style="font-size: 0.7rem; color: var(--accent); font-weight: bold;">END TIME</label>
+            <label style="font-size: 0.7rem; color: var(--accent);">END TIME</label>
             <input type="datetime-local" id="manual-end">
-            <textarea id="manual-pointers" placeholder="Notes for this session..."></textarea>
+            <textarea id="manual-pointers" placeholder="Notes..."></textarea>
             <button class="btn success full-width" onclick="saveManualLog()">Add to History</button>
         </div>
     </div>
@@ -141,10 +115,8 @@
             <div class="stat-card"><span id="stat-total-mins" class="stat-val">0</span><span class="stat-lbl">Total Mins</span></div>
             <div class="stat-card"><span id="stat-count" class="stat-val">0</span><span class="stat-lbl">Sessions</span></div>
         </div>
-        <h3>Records</h3>
         <div id="history-list"></div>
         <div style="margin-top: 40px; border-top: 1px solid #333; padding-top: 20px; display: flex; flex-direction: column; gap: 10px;">
-            <button class="btn secondary" onclick="exportToCSV()">📊 Export to CSV</button>
             <button class="btn secondary" onclick="backupJSON()">💾 Download JSON Backup</button>
             <button class="btn secondary" onclick="document.getElementById('importFile').click()">📂 Restore from Backup</button>
             <input type="file" id="importFile" class="hidden" accept=".json" onchange="restoreJSON(event)">
@@ -153,10 +125,8 @@
 
     <div id="about-page" class="hidden">
         <h3>User Guide</h3>
-        <div style="line-height: 1.7; color: #bbb;">
-            <p>A private web app for tracking prayer. Data is stored locally on your device.</p>
-        </div>
-        <button class="btn secondary full-width" style="margin-top:20px;" onclick="showPage('setup')">Back to App</button>
+        <p>Private web app for tracking prayer. Your reflections auto-save as you type.</p>
+        <button class="btn secondary full-width" onclick="showPage('setup')">Back</button>
     </div>
 </div>
 
@@ -171,7 +141,7 @@
         clearActiveSession: () => localStorage.removeItem('activeSession')
     };
 
-    let timerInterval, autosaveInterval, elapsedSeconds = 0, isPaused = false, startTime, wakeLock = null;
+    let timerInterval, autosaveInterval, elapsedSeconds = 0, isPaused = false, startTime = null, wakeLock = null;
 
     const mainPointersEl = document.getElementById('main-pointers');
     mainPointersEl.value = db.getPointers();
@@ -179,7 +149,7 @@
 
     window.onload = () => {
         const saved = db.getActiveSession();
-        if (saved) {
+        if (saved && saved.elapsed > 0) {
             const h = Math.floor(saved.elapsed / 3600).toString().padStart(2, '0');
             const m = Math.floor((saved.elapsed % 3600) / 60).toString().padStart(2, '0');
             const s = (saved.elapsed % 60).toString().padStart(2, '0');
@@ -190,10 +160,11 @@
 
     function handleRecovery(choice) {
         const saved = db.getActiveSession();
+        document.getElementById('recovery-overlay').classList.add('hidden');
+        
         if (choice === 'resume') {
             elapsedSeconds = saved.elapsed;
             startTime = Date.now() - (elapsedSeconds * 1000);
-            mainPointersEl.value = saved.pointers;
             startSession(true); 
         } else if (choice === 'save') {
             const history = db.getHistory();
@@ -206,11 +177,15 @@
             });
             db.saveHistory(history);
             db.clearActiveSession();
-            alert("Session saved.");
+            // Reset UI for fresh start
+            elapsedSeconds = 0; startTime = null;
+            updateTimerDisplay();
+            alert("Interrupted session saved to History.");
         } else {
             db.clearActiveSession();
+            elapsedSeconds = 0; startTime = null;
+            updateTimerDisplay();
         }
-        document.getElementById('recovery-overlay').classList.add('hidden');
     }
 
     document.addEventListener('visibilitychange', () => {
@@ -223,25 +198,22 @@
     function showPage(pageId) {
         ['setup', 'manual', 'history', 'about'].forEach(id => {
             document.getElementById(id + '-page').classList.add('hidden');
-            const navBtn = document.getElementById('nav-' + id);
-            if (navBtn) navBtn.classList.remove('active');
+            const btn = document.getElementById('nav-' + id);
+            if(btn) btn.classList.remove('active');
         });
         document.getElementById(pageId + '-page').classList.remove('hidden');
-        const activeNav = document.getElementById('nav-' + pageId);
-        if (activeNav) activeNav.classList.add('active');
+        const activeBtn = document.getElementById('nav-' + pageId);
+        if(activeBtn) activeBtn.classList.add('active');
         if(pageId === 'history') loadHistory();
+        if(pageId === 'manual') prepManualLog();
     }
 
     async function requestWakeLock() { if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} } }
     function releaseWakeLock() { if (wakeLock) { wakeLock.release().then(() => wakeLock = null); } }
 
     function startSession(isResuming = false) {
-        if (!isPaused && !isResuming) { 
-            startTime = Date.now(); 
-            requestWakeLock(); 
-        } else if (isPaused) {
-            startTime = Date.now() - (elapsedSeconds * 1000);
-        }
+        if (!isPaused && !isResuming) { startTime = Date.now(); requestWakeLock(); } 
+        else if (isPaused) { startTime = Date.now() - (elapsedSeconds * 1000); }
         
         isPaused = false;
         document.getElementById('start-btn').classList.add('hidden');
@@ -256,41 +228,36 @@
 
         if (autosaveInterval) clearInterval(autosaveInterval);
         autosaveInterval = setInterval(() => {
-            db.setActiveSession({
-                startTime: startTime,
-                elapsed: elapsedSeconds,
-                pointers: mainPointersEl.value
-            });
+            db.setActiveSession({ startTime, elapsed: elapsedSeconds, pointers: mainPointersEl.value });
         }, 10000);
     }
 
     function togglePause() {
         if (!isPaused) {
-            clearInterval(timerInterval); 
-            clearInterval(autosaveInterval);
+            clearInterval(timerInterval); clearInterval(autosaveInterval);
             isPaused = true;
             document.getElementById('pause-btn').innerText = "Resume";
             document.getElementById('session-status').innerText = "Paused";
             releaseWakeLock();
         } else {
-            document.getElementById('pause-btn').innerText = "Pause"; 
-            startSession();
+            document.getElementById('pause-btn').innerText = "Pause"; startSession();
         }
     }
 
     function stopSession() {
-        clearInterval(timerInterval);
-        clearInterval(autosaveInterval);
-        const history = db.getHistory();
-        history.push({ 
-            id: Date.now(), 
-            start: new Date(startTime).toISOString(), 
-            end: new Date().toISOString(), 
-            duration: elapsedSeconds, 
-            pointers: mainPointersEl.value 
-        });
-        db.saveHistory(history);
-        db.clearActiveSession();
+        clearInterval(timerInterval); clearInterval(autosaveInterval);
+        if (startTime) {
+            const history = db.getHistory();
+            history.push({ 
+                id: Date.now(), 
+                start: new Date(startTime).toISOString(), 
+                end: new Date().toISOString(), 
+                duration: elapsedSeconds, 
+                pointers: mainPointersEl.value 
+            });
+            db.saveHistory(history);
+        }
+        db.clearActiveSession(); 
         releaseWakeLock();
         location.reload(); 
     }
@@ -307,6 +274,7 @@
         const fmt = d => new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
         document.getElementById('manual-start').value = fmt(new Date(now - 1800000));
         document.getElementById('manual-end').value = fmt(now);
+        document.getElementById('manual-pointers').value = mainPointersEl.value;
     }
 
     function saveManualLog() {
@@ -316,16 +284,16 @@
         const history = db.getHistory();
         history.push({ id: Date.now(), start: s.toISOString(), end: e.toISOString(), duration: diff, pointers: document.getElementById('manual-pointers').value });
         db.saveHistory(history);
+        db.clearActiveSession(); // Clears any background session when manual log is used
         showPage('history');
     }
 
     function loadHistory() {
         let history = db.getHistory().sort((a, b) => new Date(b.start) - new Date(a.start));
         const list = document.getElementById('history-list');
-        list.innerHTML = "";
-        let totalMins = 0;
+        list.innerHTML = ""; let mins = 0;
         history.forEach(item => {
-            totalMins += (item.duration / 60);
+            mins += (item.duration / 60);
             const d = new Date(item.start);
             const itemEl = document.createElement('div');
             itemEl.className = "history-row";
@@ -341,7 +309,7 @@
                 </div>`;
             list.appendChild(itemEl);
         });
-        document.getElementById('stat-total-mins').innerText = Math.floor(totalMins);
+        document.getElementById('stat-total-mins').innerText = Math.floor(mins);
         document.getElementById('stat-count').innerText = history.length;
     }
     function toggleRow(id) { document.getElementById(`container-${id}`).classList.toggle('expanded'); }
@@ -359,15 +327,6 @@
             db.saveHistory(merged); loadHistory();
         };
         r.readAsText(e.target.files[0]);
-    }
-    function exportToCSV() {
-        const history = db.getHistory();
-        let csv = "Date,Duration(Min),Notes\n";
-        history.forEach(i => csv += `${new Date(i.start).toLocaleString().replace(/,/g,'')},${Math.round(i.duration/60)},"${(i.pointers || '').replace(/"/g, '""')}"\n`);
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' }));
-        a.download = `prayer_log.csv`;
-        a.click();
     }
 </script>
 </body>
