@@ -16,7 +16,6 @@
         }
         .container { width: 100%; max-width: 500px; padding-bottom: 50px; }
         
-        /* Header & Icons */
         .header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .help-icon { 
             background: #333; color: var(--text); width: 32px; height: 32px; 
@@ -24,7 +23,6 @@
             font-weight: bold; cursor: pointer; border: 1px solid #444; font-size: 18px;
         }
 
-        /* Nav */
         .nav { display: flex; width: 100%; gap: 8px; margin-bottom: 20px; position: sticky; top: 0; background: var(--bg); z-index: 10; padding: 5px 0; }
         .nav button { flex: 1; padding: 12px 5px; font-size: 14px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
         .nav .active { background: var(--accent); color: #000; }
@@ -38,9 +36,7 @@
             box-sizing: border-box; font-size: 16px; margin-bottom: 12px;
         }
         #main-pointers { height: 264px; resize: none; line-height: 1.5; }
-        #manual-pointers { height: 240px; } /* Restored height */
 
-        /* Timer Card */
         .timer-box {
             background: linear-gradient(145deg, #1e1e1e, #222);
             padding: 30px 20px; border-radius: 20px; text-align: center;
@@ -54,7 +50,17 @@
         .success { background: var(--success); color: #000; }
         .full-width { width: 100%; margin-top: 10px; }
 
-        /* History Items */
+        /* Recovery Modal */
+        #recovery-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 100;
+            display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;
+        }
+        .recovery-card {
+            background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid var(--accent);
+            text-align: center; max-width: 400px; width: 100%;
+        }
+
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
         .stat-card { background: var(--card); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #333; }
         .stat-val { display: block; font-size: 1.4rem; font-weight: bold; color: var(--success); }
@@ -71,13 +77,24 @@
         
         .action-bar { display: flex; gap: 10px; margin-top: 15px; padding-top: 12px; border-top: 1px solid #333; }
         .action-btn { background: #333; color: #eee; font-size: 11px; padding: 8px 12px; border-radius: 6px; border: none; flex: 1; }
-
-        .intro-text { color: var(--text); font-size: 0.95rem; margin-bottom: 25px; opacity: 0.9; line-height: 1.6; }
         .verse-footer { margin-top: 30px; text-align: center; font-size: 0.8rem; color: #555; font-style: italic; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
+
+<div id="recovery-overlay" class="hidden">
+    <div class="recovery-card">
+        <h2 style="color: var(--accent); margin-top: 0;">Incomplete Session</h2>
+        <p>A session was interrupted. Keep the progress?</p>
+        <div id="recovery-details" style="font-family: monospace; color: var(--success); margin: 15px 0; font-size: 1.5rem;">00:00:00</div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button class="btn primary" onclick="handleRecovery('resume')">Resume Session</button>
+            <button class="btn success" onclick="handleRecovery('save')">Save & Start Fresh</button>
+            <button class="btn secondary" style="background: #422;" onclick="handleRecovery('discard')">Discard Timer</button>
+        </div>
+    </div>
+</div>
 
 <div class="container">
     <div class="header">
@@ -125,9 +142,7 @@
             <div class="stat-card"><span id="stat-count" class="stat-val">0</span><span class="stat-lbl">Sessions</span></div>
         </div>
         <h3>Records</h3>
-        <p style="font-size: 0.75rem; color: #666; margin-bottom: 15px;">Tap space to expand. Tap pills to edit.</p>
         <div id="history-list"></div>
-        
         <div style="margin-top: 40px; border-top: 1px solid #333; padding-top: 20px; display: flex; flex-direction: column; gap: 10px;">
             <button class="btn secondary" onclick="exportToCSV()">📊 Export to CSV</button>
             <button class="btn secondary" onclick="backupJSON()">💾 Download JSON Backup</button>
@@ -139,15 +154,7 @@
     <div id="about-page" class="hidden">
         <h3>User Guide</h3>
         <div style="line-height: 1.7; color: #bbb;">
-            <p class="intro-text">A lightweight, private, and distraction-free web app designed to help you track your prayer sessions and keep a digital journal of your prayer pointers.</p>
-            <h4 style="color:var(--accent); margin-bottom:5px;">📖 Manual Logging</h4>
-            <p>Missed a session? Use the <strong>Log</strong> tab to backdate entries. Simply select your start and end times, paste your pointers, and save.</p>
-            <h4 style="color:var(--accent); margin-bottom:5px;">📲 Transferring Data</h4>
-            <p>To move data: History > <strong>Download JSON Backup</strong>. On the new device, use <strong>Restore from Backup</strong>.</p>
-            <h4 style="color:var(--accent); margin-bottom:5px;">🔒 Privacy</h4>
-            <p>Data stays on your device. Please backup regularly to avoid loss if you clear browser cache.</p>
-            <h4 style="color:var(--accent); margin-bottom:5px;">📱 Install as App</h4>
-            <p>Tap <strong>Share</strong> (iOS) or <strong>Menu</strong> (Android) and select <strong>'Add to Home Screen'</strong>.</p>
+            <p>A private web app for tracking prayer. Data is stored locally on your device.</p>
         </div>
         <button class="btn secondary full-width" style="margin-top:20px;" onclick="showPage('setup')">Back to App</button>
     </div>
@@ -159,17 +166,53 @@
         saveHistory: (data) => localStorage.setItem('prayerHistory', JSON.stringify(data)),
         getPointers: () => localStorage.getItem('mainPointers') || "",
         savePointers: (txt) => localStorage.setItem('mainPointers', txt),
-        setLastBackup: () => localStorage.setItem('lastBackupDate', Date.now()),
-        getLastBackup: () => localStorage.getItem('lastBackupDate') || 0
+        getActiveSession: () => JSON.parse(localStorage.getItem('activeSession')),
+        setActiveSession: (data) => localStorage.setItem('activeSession', JSON.stringify(data)),
+        clearActiveSession: () => localStorage.removeItem('activeSession')
     };
 
-    let timerInterval, elapsedSeconds = 0, isPaused = false, startTime, wakeLock = null;
+    let timerInterval, autosaveInterval, elapsedSeconds = 0, isPaused = false, startTime, wakeLock = null;
 
     const mainPointersEl = document.getElementById('main-pointers');
     mainPointersEl.value = db.getPointers();
     mainPointersEl.addEventListener('input', () => db.savePointers(mainPointersEl.value));
 
-    // CLOCK MATH FIX: Snaps UI to real time when user returns to app
+    window.onload = () => {
+        const saved = db.getActiveSession();
+        if (saved) {
+            const h = Math.floor(saved.elapsed / 3600).toString().padStart(2, '0');
+            const m = Math.floor((saved.elapsed % 3600) / 60).toString().padStart(2, '0');
+            const s = (saved.elapsed % 60).toString().padStart(2, '0');
+            document.getElementById('recovery-details').innerText = `${h}:${m}:${s}`;
+            document.getElementById('recovery-overlay').classList.remove('hidden');
+        }
+    };
+
+    function handleRecovery(choice) {
+        const saved = db.getActiveSession();
+        if (choice === 'resume') {
+            elapsedSeconds = saved.elapsed;
+            startTime = Date.now() - (elapsedSeconds * 1000);
+            mainPointersEl.value = saved.pointers;
+            startSession(true); 
+        } else if (choice === 'save') {
+            const history = db.getHistory();
+            history.push({ 
+                id: Date.now(), 
+                start: new Date(saved.startTime).toISOString(), 
+                end: new Date().toISOString(), 
+                duration: saved.elapsed, 
+                pointers: saved.pointers 
+            });
+            db.saveHistory(history);
+            db.clearActiveSession();
+            alert("Session saved.");
+        } else {
+            db.clearActiveSession();
+        }
+        document.getElementById('recovery-overlay').classList.add('hidden');
+    }
+
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible' && startTime && !isPaused) {
             elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
@@ -186,22 +229,20 @@
         document.getElementById(pageId + '-page').classList.remove('hidden');
         const activeNav = document.getElementById('nav-' + pageId);
         if (activeNav) activeNav.classList.add('active');
-
-        if(pageId === 'history') { loadHistory(); checkBackupReminder(); }
-        if(pageId === 'manual') prepManualLog();
+        if(pageId === 'history') loadHistory();
     }
 
     async function requestWakeLock() { if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} } }
     function releaseWakeLock() { if (wakeLock) { wakeLock.release().then(() => wakeLock = null); } }
 
-    function startSession() {
-        if (!isPaused) { 
-            startTime = Date.now(); // Record start timestamp
+    function startSession(isResuming = false) {
+        if (!isPaused && !isResuming) { 
+            startTime = Date.now(); 
             requestWakeLock(); 
-        } else {
-            // Adjust startTime to account for duration already elapsed before pause
+        } else if (isPaused) {
             startTime = Date.now() - (elapsedSeconds * 1000);
         }
+        
         isPaused = false;
         document.getElementById('start-btn').classList.add('hidden');
         ['pause-btn', 'stop-btn'].forEach(id => document.getElementById(id).classList.remove('hidden'));
@@ -209,15 +250,25 @@
         
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => { 
-            // Calculate elapsed time from the source of truth (system clock)
             elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
             updateTimerDisplay(); 
         }, 1000);
+
+        if (autosaveInterval) clearInterval(autosaveInterval);
+        autosaveInterval = setInterval(() => {
+            db.setActiveSession({
+                startTime: startTime,
+                elapsed: elapsedSeconds,
+                pointers: mainPointersEl.value
+            });
+        }, 10000);
     }
 
     function togglePause() {
         if (!isPaused) {
-            clearInterval(timerInterval); isPaused = true;
+            clearInterval(timerInterval); 
+            clearInterval(autosaveInterval);
+            isPaused = true;
             document.getElementById('pause-btn').innerText = "Resume";
             document.getElementById('session-status').innerText = "Paused";
             releaseWakeLock();
@@ -229,6 +280,7 @@
 
     function stopSession() {
         clearInterval(timerInterval);
+        clearInterval(autosaveInterval);
         const history = db.getHistory();
         history.push({ 
             id: Date.now(), 
@@ -238,12 +290,9 @@
             pointers: mainPointersEl.value 
         });
         db.saveHistory(history);
+        db.clearActiveSession();
         releaseWakeLock();
-        elapsedSeconds = 0; isPaused = false; startTime = null;
-        updateTimerDisplay();
-        document.getElementById('start-btn').classList.remove('hidden');
-        ['pause-btn', 'stop-btn'].forEach(id => document.getElementById(id).classList.add('hidden'));
-        document.getElementById('session-status').innerText = "Saved";
+        location.reload(); 
     }
 
     function updateTimerDisplay() {
@@ -258,13 +307,12 @@
         const fmt = d => new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
         document.getElementById('manual-start').value = fmt(new Date(now - 1800000));
         document.getElementById('manual-end').value = fmt(now);
-        document.getElementById('manual-pointers').value = mainPointersEl.value;
     }
 
     function saveManualLog() {
         const s = new Date(document.getElementById('manual-start').value), e = new Date(document.getElementById('manual-end').value);
         const diff = Math.floor((e - s) / 1000);
-        if (diff <= 0) return alert("End time must be after start time.");
+        if (diff <= 0) return alert("End time error.");
         const history = db.getHistory();
         history.push({ id: Date.now(), start: s.toISOString(), end: e.toISOString(), duration: diff, pointers: document.getElementById('manual-pointers').value });
         db.saveHistory(history);
@@ -276,135 +324,50 @@
         const list = document.getElementById('history-list');
         list.innerHTML = "";
         let totalMins = 0;
-
         history.forEach(item => {
             totalMins += (item.duration / 60);
             const d = new Date(item.start);
-            const dateStr = d.toLocaleDateString([], {month:'short', day:'numeric'});
-            const timeStr = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            
             const itemEl = document.createElement('div');
             itemEl.className = "history-row";
             itemEl.innerHTML = `
                 <div class="row-summary">
-                    <div style="display:flex; gap:5px;">
-                        <span class="edit-pill" contenteditable="true" onblur="updateField(${item.id}, 'startDate', this.innerText)">${dateStr}</span>
-                        <span class="edit-pill" style="color:#777" contenteditable="true" onblur="updateField(${item.id}, 'startTime', this.innerText)">${timeStr}</span>
-                    </div>
+                    <span>${d.toLocaleDateString([], {month:'short', day:'numeric'})}</span>
                     <div class="toggle-zone" onclick="toggleRow(${item.id})"></div>
-                    <div style="font-weight:bold; color:var(--success); min-width: 60px; text-align: right;">
-                        <span class="edit-pill" contenteditable="true" onblur="updateField(${item.id}, 'duration', this.innerText)">${Math.round(item.duration / 60)}</span>m
-                    </div>
+                    <span style="font-weight:bold; color:var(--success);">${Math.round(item.duration / 60)}m</span>
                 </div>
                 <div id="container-${item.id}" class="pointer-container">
-                    <div class="pointer-cell" contenteditable="true" onblur="updateField(${item.id}, 'pointers', this.innerText)">${item.pointers || "No notes..."}</div>
-                    <div class="action-bar">
-                        <button class="action-btn" onclick="copyToClipboard('${item.id}')">📋 Copy</button>
-                        <button class="action-btn" style="background:#422;" onclick="deleteRecord(${item.id})">🗑️ Delete</button>
-                    </div>
-                </div>
-            `;
+                    <div class="pointer-cell">${item.pointers || "No notes..."}</div>
+                    <div class="action-bar"><button class="action-btn" style="background:#422;" onclick="deleteRecord(${item.id})">🗑️ Delete</button></div>
+                </div>`;
             list.appendChild(itemEl);
         });
         document.getElementById('stat-total-mins').innerText = Math.floor(totalMins);
         document.getElementById('stat-count').innerText = history.length;
     }
-
     function toggleRow(id) { document.getElementById(`container-${id}`).classList.toggle('expanded'); }
-
-    function copyToClipboard(id) {
-        const text = document.querySelector(`#container-${id} .pointer-cell`).innerText;
-        navigator.clipboard.writeText(text).then(() => alert("Copied!"));
-    }
-
-    function updateField(id, field, val) {
-        let history = db.getHistory();
-        const i = history.findIndex(h => h.id === id);
-        if(i === -1) return;
-        if(field === 'pointers') history[i].pointers = val;
-        if(field === 'duration') history[i].duration = (parseInt(val) || 0) * 60;
-        if(field === 'startDate' || field === 'startTime') {
-            const current = new Date(history[i].start);
-            if(field === 'startDate') {
-                const newD = new Date(val + ", " + current.getFullYear());
-                if(!isNaN(newD)) current.setFullYear(newD.getFullYear(), newD.getMonth(), newD.getDate());
-            } else {
-                const t = val.match(/(\d+):(\d+)\s*(AM|PM)?/i);
-                if(t) {
-                    let h = parseInt(t[1]);
-                    if(t[3]?.toUpperCase() === 'PM' && h < 12) h += 12;
-                    if(t[3]?.toUpperCase() === 'AM' && h === 12) h = 0;
-                    current.setHours(h, parseInt(t[2]));
-                }
-            }
-            history[i].start = current.toISOString();
-        }
-        db.saveHistory(history);
-        if(field !== 'pointers') loadHistory();
-    }
-
-    function deleteRecord(id) {
-        if(confirm("Delete record?")) {
-            db.saveHistory(db.getHistory().filter(h => h.id !== id));
-            loadHistory();
-        }
-    }
-
-    function checkBackupReminder() {
-        const thirtyDays = 30 * 24 * 60 * 60 * 1000;
-        if (Date.now() - db.getLastBackup() > thirtyDays) {
-            setTimeout(() => {
-                if(confirm("Backup Reminder: It's been a month since your last backup. Would you like to download a JSON backup now?")) {
-                    backupJSON();
-                }
-            }, 500);
-        }
-    }
-
+    function deleteRecord(id) { if(confirm("Delete?")) { db.saveHistory(db.getHistory().filter(h => h.id !== id)); loadHistory(); } }
     function backupJSON() {
-        db.setLastBackup();
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([localStorage.getItem('prayerHistory') || "[]"], {type:'application/json'}));
         a.download = `prayer_backup_${new Date().toISOString().slice(0,10)}.json`;
         a.click();
     }
-
     function restoreJSON(e) {
         const r = new FileReader();
         r.onload = ev => {
-            if(confirm("Merge history?")) {
-                let merged = [...JSON.parse(ev.target.result), ...db.getHistory()].filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
-                db.saveHistory(merged); loadHistory();
-            }
+            let merged = [...JSON.parse(ev.target.result), ...db.getHistory()].filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
+            db.saveHistory(merged); loadHistory();
         };
         r.readAsText(e.target.files[0]);
     }
-
     function exportToCSV() {
         const history = db.getHistory();
-        let csvContent = "Date,Duration (Min),Notes\n";
-        
-        history.forEach(i => {
-            const date = new Date(i.start).toLocaleString().replace(/,/g,'');
-            const mins = Math.round(i.duration/60);
-            const notes = `"${(i.pointers || '').replace(/"/g, '""')}"`;
-            csvContent += `${date},${mins},${notes}\n`;
-        });
-    
-        const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
+        let csv = "Date,Duration(Min),Notes\n";
+        history.forEach(i => csv += `${new Date(i.start).toLocaleString().replace(/,/g,'')},${Math.round(i.duration/60)},"${(i.pointers || '').replace(/"/g, '""')}"\n`);
         const a = document.createElement('a');
-        
-        a.href = url;
-        a.download = `prayer_log_${new Date().toISOString().slice(0,10)}.csv`;
-        
-        document.body.appendChild(a);
+        a.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' }));
+        a.download = `prayer_log.csv`;
         a.click();
-        
-        setTimeout(() => {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }, 100);
     }
 </script>
 </body>
