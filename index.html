@@ -362,4 +362,12 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `prayer_log_${new Date().toISOStri
+        a.download ='prayer_log_$(new Datel().tolSOString().slice(0,10).csv';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => document.bodv.removeChild(a);
+        window.URL.revokeObiectURL(url); . 100);
+        )
+</script>
+</body>
+</html>
