@@ -35,7 +35,9 @@
             border: 1px solid #444; border-radius: 12px; padding: 14px;
             box-sizing: border-box; font-size: 16px; margin-bottom: 12px;
         }
+        /* Fixed: Restored Manual Heights */
         #main-pointers { height: 264px; resize: none; line-height: 1.5; }
+        #manual-pointers { height: 180px; resize: none; }
 
         .timer-box {
             background: linear-gradient(145deg, #1e1e1e, #222);
@@ -50,7 +52,6 @@
         .success { background: var(--success); color: #000; }
         .full-width { width: 100%; margin-top: 10px; }
 
-        /* Recovery Modal */
         #recovery-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); z-index: 100;
@@ -75,7 +76,7 @@
         .pointer-cell { white-space: pre-wrap; color: #ccc; outline: none; font-style: italic; line-height: 1.6; font-size: 14px; }
         
         .action-bar { display: flex; gap: 10px; margin-top: 15px; padding-top: 12px; border-top: 1px solid #333; }
-        .action-btn { background: #333; color: #eee; font-size: 11px; padding: 8px 12px; border-radius: 6px; border: none; flex: 1; }
+        .action-btn { background: #333; color: #eee; font-size: 11px; padding: 8px 12px; border-radius: 6px; border: none; flex: 1; cursor: pointer; }
         .verse-footer { margin-top: 30px; text-align: center; font-size: 0.8rem; color: #555; font-style: italic; }
         .hidden { display: none !important; }
     </style>
@@ -85,12 +86,13 @@
 <div id="recovery-overlay" class="hidden">
     <div class="recovery-card">
         <h2 style="color: var(--accent); margin-top: 0;">Unfinished Session</h2>
-        <p>A session was interrupted. Would you like to keep the progress?</p>
+        <p style="margin-bottom: 5px;">A session was found:</p>
+        <div id="recovery-timestamp" style="font-size: 0.85rem; color: #888; margin-bottom: 15px;">Started: --:--</div>
         <div id="recovery-details" style="font-family: monospace; color: var(--success); margin: 15px 0; font-size: 1.5rem;">00:00:00</div>
         <div style="display: flex; flex-direction: column; gap: 10px;">
-            <button class="btn primary" onclick="handleRecovery('resume')">Resume Session</button>
+            <button class="btn primary" onclick="handleRecovery('resume')">Resume & Catch Up</button>
             <button class="btn success" onclick="handleRecovery('save')">Save to History</button>
-            <button class="btn secondary" style="background: #422;" onclick="handleRecovery('discard')">Discard Timer</button>
+            <button class="btn secondary" style="background: #422;" onclick="handleRecovery('discard')">Discard Session</button>
         </div>
     </div>
 </div>
@@ -109,7 +111,7 @@
 
     <div id="setup-page">
         <h3>Prayer & Reflections</h3>
-        <textarea id="main-pointers" placeholder="Enter your pointers, thoughts, or reflections here..."></textarea>
+        <textarea id="main-pointers" placeholder="Enter reflections here..."></textarea>
         <div class="timer-box">
             <div id="display-time">00:00:00</div>
             <p id="session-status" style="color: #666; margin: 10px 0; font-size: 0.9rem;">Ready</p>
@@ -129,7 +131,7 @@
             <input type="datetime-local" id="manual-start">
             <label style="font-size: 0.7rem; color: var(--accent); font-weight: bold;">END TIME</label>
             <input type="datetime-local" id="manual-end">
-            <textarea id="manual-pointers" placeholder="Notes for this session..."></textarea>
+            <textarea id="manual-pointers" placeholder="Add notes for this manual entry..."></textarea>
             <button class="btn success full-width" onclick="saveManualLog()">Add to History</button>
         </div>
     </div>
@@ -140,7 +142,6 @@
             <div class="stat-card"><span id="stat-total-mins" class="stat-val">0</span><span class="stat-lbl">Total Mins</span></div>
             <div class="stat-card"><span id="stat-count" class="stat-val">0</span><span class="stat-lbl">Sessions</span></div>
         </div>
-        <h3>Records</h3>
         <div id="history-list"></div>
         <div style="margin-top: 40px; border-top: 1px solid #333; padding-top: 20px; display: flex; flex-direction: column; gap: 10px;">
             <button class="btn secondary" onclick="exportToCSV()">📊 Export to CSV</button>
@@ -153,7 +154,15 @@
     <div id="about-page" class="hidden">
         <h3>User Guide</h3>
         <div style="line-height: 1.7; color: #bbb;">
-            <p>A private, distraction-free app to track your prayer life. Your reflections auto-save to this device as you type.</p>
+            <p style="color: var(--text); font-size: 0.95rem; margin-bottom: 25px; opacity: 0.9; line-height: 1.6;">A lightweight, private, and distraction-free web app designed to help you track your prayer sessions and keep a digital journal of your prayer pointers.</p>
+            <h4 style="color:var(--accent); margin-bottom:5px;">📖 Manual Logging</h4>
+            <p>Missed a session? Use the <strong>Log</strong> tab to backdate entries. Simply select your start and end times, paste your pointers, and save.</p>
+            <h4 style="color:var(--accent); margin-bottom:5px;">📲 Transferring Data</h4>
+            <p>To move data: History > <strong>Download JSON Backup</strong>. On the new device, use <strong>Restore from Backup</strong>.</p>
+            <h4 style="color:var(--accent); margin-bottom:5px;">🔒 Privacy</h4>
+            <p>Data stays on your device. Auto-saves every 10 seconds during active sessions to prevent data loss. Please backup regularly.</p>
+            <h4 style="color:var(--accent); margin-bottom:5px;">📱 Install as App</h4>
+            <p>Tap <strong>Share</strong> (iOS) or <strong>Menu</strong> (Android) and select <strong>'Add to Home Screen'</strong>.</p>
         </div>
         <button class="btn secondary full-width" style="margin-top:20px;" onclick="showPage('setup')">Back to App</button>
     </div>
@@ -176,10 +185,11 @@
     mainPointersEl.value = db.getPointers();
     mainPointersEl.addEventListener('input', () => db.savePointers(mainPointersEl.value));
 
-    // Session Recovery on Load
     window.onload = () => {
         const saved = db.getActiveSession();
-        if (saved && saved.elapsed > 0) {
+        if (saved && saved.startTime) {
+            const startDate = new Date(saved.startTime);
+            document.getElementById('recovery-timestamp').innerText = `Started: ${startDate.toLocaleDateString()} ${startDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
             const h = Math.floor(saved.elapsed / 3600).toString().padStart(2, '0');
             const m = Math.floor((saved.elapsed % 3600) / 60).toString().padStart(2, '0');
             const s = (saved.elapsed % 60).toString().padStart(2, '0');
@@ -191,79 +201,53 @@
     function handleRecovery(choice) {
         const saved = db.getActiveSession();
         document.getElementById('recovery-overlay').classList.add('hidden');
-        
         if (choice === 'resume') {
-            elapsedSeconds = saved.elapsed;
-            startTime = Date.now() - (elapsedSeconds * 1000); // Clock math restoration
+            startTime = saved.startTime;
+            elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
             mainPointersEl.value = saved.pointers;
             startSession(true); 
         } else if (choice === 'save') {
             const history = db.getHistory();
-            history.push({ 
-                id: Date.now(), 
-                start: new Date(saved.startTime).toISOString(), 
-                end: new Date().toISOString(), 
-                duration: saved.elapsed, 
-                pointers: saved.pointers 
-            });
+            history.push({ id: Date.now(), start: new Date(saved.startTime).toISOString(), end: new Date().toISOString(), duration: saved.elapsed, pointers: saved.pointers });
             db.saveHistory(history);
             db.clearActiveSession();
             resetTimerUI();
-            alert("Interrupted session saved.");
         } else {
             db.clearActiveSession();
             resetTimerUI();
         }
     }
 
-    function resetTimerUI() {
-        elapsedSeconds = 0;
-        startTime = null;
-        updateTimerDisplay();
-    }
-
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible' && startTime && !isPaused) {
-            elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
-            updateTimerDisplay();
-        }
-    });
+    function resetTimerUI() { elapsedSeconds = 0; startTime = null; updateTimerDisplay(); }
 
     function showPage(pageId) {
         ['setup', 'manual', 'history', 'about'].forEach(id => {
             document.getElementById(id + '-page').classList.add('hidden');
             const btn = document.getElementById('nav-' + id);
-            if (btn) btn.classList.remove('active');
+            if(btn) btn.classList.remove('active');
         });
         document.getElementById(pageId + '-page').classList.remove('hidden');
-        const activeNav = document.getElementById('nav-' + pageId);
-        if (activeNav) activeNav.classList.add('active');
-        if (pageId === 'history') loadHistory();
-        if (pageId === 'manual') prepManualLog();
+        const activeBtn = document.getElementById('nav-' + pageId);
+        if(activeBtn) activeBtn.classList.add('active');
+        if(pageId === 'history') loadHistory();
+        if(pageId === 'manual') prepManualLog();
     }
 
     async function requestWakeLock() { if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} } }
     function releaseWakeLock() { if (wakeLock) { wakeLock.release().then(() => wakeLock = null); } }
 
     function startSession(isResuming = false) {
-        if (!isPaused && !isResuming) { 
-            startTime = Date.now(); 
-            requestWakeLock(); 
-        } else if (isPaused) {
-            startTime = Date.now() - (elapsedSeconds * 1000);
-        }
-        
+        if (!isPaused && !isResuming) { startTime = Date.now(); requestWakeLock(); } 
+        else if (isPaused) { startTime = Date.now() - (elapsedSeconds * 1000); }
         isPaused = false;
         document.getElementById('start-btn').classList.add('hidden');
         ['pause-btn', 'stop-btn'].forEach(id => document.getElementById(id).classList.remove('hidden'));
         document.getElementById('session-status').innerText = "Session Active";
-        
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => { 
-            elapsedSeconds = Math.floor((Date.now() - startTime) / 1000); // HIGH PRECISION MATH
+            elapsedSeconds = Math.floor((Date.now() - startTime) / 1000); 
             updateTimerDisplay(); 
         }, 1000);
-
         if (autosaveInterval) clearInterval(autosaveInterval);
         autosaveInterval = setInterval(() => {
             db.setActiveSession({ startTime, elapsed: elapsedSeconds, pointers: mainPointersEl.value });
@@ -272,35 +256,24 @@
 
     function togglePause() {
         if (!isPaused) {
-            clearInterval(timerInterval); 
-            clearInterval(autosaveInterval);
+            clearInterval(timerInterval); clearInterval(autosaveInterval);
             isPaused = true;
             document.getElementById('pause-btn').innerText = "Resume";
             document.getElementById('session-status').innerText = "Paused";
             releaseWakeLock();
         } else {
-            document.getElementById('pause-btn').innerText = "Pause"; 
-            startSession();
+            document.getElementById('pause-btn').innerText = "Pause"; startSession();
         }
     }
 
     function stopSession() {
-        clearInterval(timerInterval);
-        clearInterval(autosaveInterval);
+        clearInterval(timerInterval); clearInterval(autosaveInterval);
         if (startTime) {
             const history = db.getHistory();
-            history.push({ 
-                id: Date.now(), 
-                start: new Date(startTime).toISOString(), 
-                end: new Date().toISOString(), 
-                duration: elapsedSeconds, 
-                pointers: mainPointersEl.value 
-            });
+            history.push({ id: Date.now(), start: new Date(startTime).toISOString(), end: new Date().toISOString(), duration: elapsedSeconds, pointers: mainPointersEl.value });
             db.saveHistory(history);
         }
-        db.clearActiveSession();
-        releaseWakeLock();
-        location.reload(); 
+        db.clearActiveSession(); releaseWakeLock(); location.reload(); 
     }
 
     function updateTimerDisplay() {
@@ -325,45 +298,50 @@
         const history = db.getHistory();
         history.push({ id: Date.now(), start: s.toISOString(), end: e.toISOString(), duration: diff, pointers: document.getElementById('manual-pointers').value });
         db.saveHistory(history);
-        db.clearActiveSession();
-        showPage('history');
+        db.clearActiveSession(); showPage('history');
     }
 
     function loadHistory() {
         let history = db.getHistory().sort((a, b) => new Date(b.start) - new Date(a.start));
         const list = document.getElementById('history-list');
-        list.innerHTML = ""; let totalMins = 0;
+        list.innerHTML = ""; let mins = 0;
         history.forEach(item => {
-            totalMins += (item.duration / 60);
+            mins += (item.duration / 60);
             const d = new Date(item.start);
             const itemEl = document.createElement('div');
             itemEl.className = "history-row";
             itemEl.innerHTML = `
                 <div class="row-summary">
-                    <span style="font-size:0.9rem;">${d.toLocaleDateString([], {month:'short', day:'numeric'})}</span>
+                    <span>${d.toLocaleDateString([], {month:'short', day:'numeric'})}</span>
                     <div class="toggle-zone" onclick="toggleRow(${item.id})"></div>
                     <span style="font-weight:bold; color:var(--success);">${Math.round(item.duration / 60)}m</span>
                 </div>
                 <div id="container-${item.id}" class="pointer-container">
-                    <div class="pointer-cell">${item.pointers || "No notes..."}</div>
-                    <div class="action-bar"><button class="action-btn" style="background:#422;" onclick="deleteRecord(${item.id})">🗑️ Delete</button></div>
+                    <div class="pointer-cell" id="ptr-${item.id}">${item.pointers || "No notes..."}</div>
+                    <div class="action-bar">
+                        <button class="action-btn" onclick="copyRecord(${item.id})">📋 Copy</button>
+                        <button class="action-btn" style="background:#422;" onclick="deleteRecord(${item.id})">🗑️ Delete</button>
+                    </div>
                 </div>`;
             list.appendChild(itemEl);
         });
-        document.getElementById('stat-total-mins').innerText = Math.floor(totalMins);
+        document.getElementById('stat-total-mins').innerText = Math.floor(mins);
         document.getElementById('stat-count').innerText = history.length;
+    }
+    
+    function copyRecord(id) {
+        const txt = document.getElementById(`ptr-${id}`).innerText;
+        navigator.clipboard.writeText(txt).then(() => alert("Notes copied to clipboard."));
     }
 
     function toggleRow(id) { document.getElementById(`container-${id}`).classList.toggle('expanded'); }
     function deleteRecord(id) { if(confirm("Delete?")) { db.saveHistory(db.getHistory().filter(h => h.id !== id)); loadHistory(); } }
-
     function backupJSON() {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([localStorage.getItem('prayerHistory') || "[]"], {type:'application/json'}));
         a.download = `prayer_backup_${new Date().toISOString().slice(0,10)}.json`;
         a.click();
     }
-
     function restoreJSON(e) {
         const r = new FileReader();
         r.onload = ev => {
@@ -372,7 +350,6 @@
         };
         r.readAsText(e.target.files[0]);
     }
-
     function exportToCSV() {
         const history = db.getHistory();
         let csv = "Date,Duration(Min),Notes\n";
@@ -384,4 +361,4 @@
     }
 </script>
 </body>
-</html>
+</html>                                                                                                                         
