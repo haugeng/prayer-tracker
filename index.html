@@ -35,6 +35,7 @@
             border: 1px solid #444; border-radius: 12px; padding: 14px;
             box-sizing: border-box; font-size: 16px; margin-bottom: 12px;
         }
+        /* Fixed: Restored Manual Heights */
         #main-pointers { height: 264px; resize: none; line-height: 1.5; }
         #manual-pointers { height: 180px; resize: none; }
 
@@ -152,12 +153,16 @@
 
     <div id="about-page" class="hidden">
         <h3>User Guide</h3>
-        <div style="line-height: 1.6; color: #bbb; font-size: 0.95rem;">
-            <p><strong>Privacy:</strong> All your data is stored locally on your device's browser. No data is sent to a server.</p>
-            <p><strong>Timer:</strong> Anchored to real-world time. Even if you close the app, you can "Resume & Catch Up" to the correct duration.</p>
-            <p><strong>Auto-Save:</strong> Your reflections in the Timer page save every 10 seconds while the session is active.</p>
-            <p><strong>Manual Entry:</strong> Forgot to start the timer? Use the Log tab to record past sessions manually.</p>
-            <p><strong>Backups:</strong> Use the History tab to download a JSON file. Keep this safe as clearing your browser cache may delete your data.</p>
+        <div style="line-height: 1.7; color: #bbb;">
+            <p style="color: var(--text); font-size: 0.95rem; margin-bottom: 25px; opacity: 0.9; line-height: 1.6;">A lightweight, private, and distraction-free web app designed to help you track your prayer sessions and keep a digital journal of your prayer pointers.</p>
+            <h4 style="color:var(--accent); margin-bottom:5px;">📖 Manual Logging</h4>
+            <p>Missed a session? Use the <strong>Log</strong> tab to backdate entries. Simply select your start and end times, paste your pointers, and save.</p>
+            <h4 style="color:var(--accent); margin-bottom:5px;">📲 Transferring Data</h4>
+            <p>To move data: History > <strong>Download JSON Backup</strong>. On the new device, use <strong>Restore from Backup</strong>.</p>
+            <h4 style="color:var(--accent); margin-bottom:5px;">🔒 Privacy</h4>
+            <p>Data stays on your device. Auto-saves every 10 seconds during active sessions to prevent data loss. Please backup regularly.</p>
+            <h4 style="color:var(--accent); margin-bottom:5px;">📱 Install as App</h4>
+            <p>Tap <strong>Share</strong> (iOS) or <strong>Menu</strong> (Android) and select <strong>'Add to Home Screen'</strong>.</p>
         </div>
         <button class="btn secondary full-width" style="margin-top:20px;" onclick="showPage('setup')">Back to App</button>
     </div>
