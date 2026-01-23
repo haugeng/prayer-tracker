@@ -16,20 +16,19 @@
         }
         .container { width: 100%; max-width: 500px; padding-bottom: 50px; }
         
+        /* Navigation & Headers */
         .header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .help-icon { 
             background: #333; color: var(--text); width: 32px; height: 32px; 
             border-radius: 50%; display: flex; align-items: center; justify-content: center; 
             font-weight: bold; cursor: pointer; border: 1px solid #444; font-size: 18px;
         }
-
         .nav { display: flex; width: 100%; gap: 8px; margin-bottom: 20px; position: sticky; top: 0; background: var(--bg); z-index: 10; padding: 5px 0; }
         .nav button { flex: 1; padding: 12px 5px; font-size: 14px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
         .nav .active { background: var(--accent); color: #000; }
         .secondary { background: #2a2a2a; color: white; }
 
         h3 { border-bottom: 1px solid #333; padding-bottom: 8px; margin-top: 10px; font-size: 1.1rem; }
-        
         textarea, input {
             width: 100%; background: var(--card); color: var(--text);
             border: 1px solid #444; border-radius: 12px; padding: 14px;
@@ -38,19 +37,20 @@
         #main-pointers { height: 264px; resize: none; line-height: 1.5; }
         #manual-pointers { height: 180px; resize: none; }
 
+        /* Timer UI */
         .timer-box {
             background: linear-gradient(145deg, #1e1e1e, #222);
             padding: 30px 20px; border-radius: 20px; text-align: center;
             margin: 15px 0; border: 1px solid #333;
         }
         #display-time { font-size: 3.5rem; font-weight: bold; font-family: monospace; color: var(--accent); }
-        
         .btn { border: none; font-weight: bold; cursor: pointer; padding: 15px; border-radius: 12px; }
         .primary { background: var(--accent); color: #000; }
         .stop { background: var(--error); color: white; }
         .success { background: var(--success); color: #000; }
         .full-width { width: 100%; margin-top: 10px; }
 
+        /* Dashboard & History Logic */
         .dash-card { background: var(--card); border-radius: 15px; padding: 15px; margin-bottom: 10px; border: 1px solid #333; }
         .dash-main { display: flex; justify-content: space-around; align-items: center; margin-bottom: 15px; }
         .dash-item { text-align: center; flex: 1; }
@@ -58,38 +58,28 @@
         .dash-lbl { font-size: 0.65rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; display: block; }
         .dash-footer { display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid #333; font-size: 0.75rem; color: #666; }
 
-        /* Indicator for Clickable Goal */
-        .clickable-goal { text-decoration: underline dashed var(--accent); text-underline-offset: 4px; }
+        /* UX Indicators */
+        .clickable-item { text-decoration: underline dashed var(--accent); text-underline-offset: 4px; cursor: pointer; }
+        .chevron { display: inline-block; margin-right: 10px; transition: transform 0.2s ease; color: var(--accent); font-size: 0.8rem; }
+        .expanded .chevron { transform: rotate(90deg); }
+        .ghost-input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
 
-        .admin-toggle { 
-            background: transparent; color: #888; border: 1px solid #333; border-radius: 8px; 
-            padding: 8px; font-size: 0.75rem; width: 100%; cursor: pointer; margin-bottom: 10px;
-        }
-        #admin-tools { 
-            max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; 
-            display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;
-        }
+        .admin-toggle { background: transparent; color: #888; border: 1px solid #333; border-radius: 8px; padding: 8px; font-size: 0.75rem; width: 100%; cursor: pointer; margin-bottom: 10px; }
+        #admin-tools { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
         #admin-tools.open { max-height: 300px; padding-bottom: 10px; border-bottom: 1px solid #333; }
 
         .year-head { font-size: 1.3rem; font-weight: bold; color: var(--accent); margin: 20px 0 5px 0; }
         .month-head { font-size: 0.85rem; color: #888; text-transform: uppercase; margin: 10px 0 5px 0; border-bottom: 1px solid #222; padding-bottom: 4px; }
 
-        #recovery-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 100;
-            display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;
-        }
-        .recovery-card {
-            background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid var(--accent);
-            text-align: center; max-width: 400px; width: 100%;
-        }
+        /* Recovery UI */
+        #recovery-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        .recovery-card { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid var(--accent); text-align: center; max-width: 400px; width: 100%; }
 
+        /* Grouped History List */
         .history-day-group { border-bottom: 1px solid #222; }
         .day-summary { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; cursor: pointer; }
-        
         .sessions-container { max-height: 0; overflow: hidden; transition: all 0.3s ease; background: #161616; border-radius: 10px; }
         .sessions-container.expanded { max-height: 2000px; padding: 10px; margin-bottom: 15px; border: 1px solid #333; }
-        
         .session-item { border-bottom: 1px solid #222; padding: 12px 0; }
         .session-item:last-child { border-bottom: none; }
         .session-meta { display: flex; justify-content: space-between; font-size: 0.75rem; color: #888; margin-bottom: 8px; }
@@ -163,8 +153,8 @@
                     <span id="dash-week-total" class="dash-val">0m</span>
                     <span class="dash-lbl">This Week (M-S)</span>
                 </div>
-                <div class="dash-item" onclick="setDailyGoal()" style="cursor:pointer">
-                    <span id="dash-goal-val" class="dash-val clickable-goal">0m</span>
+                <div class="dash-item" onclick="setDailyGoal()">
+                    <span id="dash-goal-val" class="dash-val clickable-item">0m</span>
                     <span class="dash-lbl">Daily Goal 🎯</span>
                 </div>
                 <div class="dash-item">
@@ -192,13 +182,15 @@
     <div id="about-page" class="hidden">
         <h3>User Guide</h3>
         <div style="line-height: 1.7; color: #bbb;">
-            <p style="color: var(--text); font-size: 0.95rem; margin-bottom: 25px; opacity: 0.9; line-height: 1.6;">A lightweight, private tracker for prayer sessions and reflections.</p>
+            <p style="color: var(--text); font-size: 0.95rem; margin-bottom: 25px; opacity: 0.9; line-height: 1.6;">A lightweight, private, and distraction-free web app designed to help you track your prayer sessions and keep a digital journal of your prayer pointers.</p>
             <h4 style="color:var(--accent); margin-bottom:5px;">📖 Manual Logging</h4>
-            <p>Use the <strong>Log</strong> tab to backdate entries manually.</p>
+            <p>Missed a session? Use the <strong>Log</strong> tab to backdate entries. Simply select your start and end times, paste your pointers, and save.</p>
             <h4 style="color:var(--accent); margin-bottom:5px;">📲 Transferring Data</h4>
-            <p>Use <strong>JSON Backup</strong> to move data between devices.</p>
+            <p>To move data: History > <strong>Download JSON Backup</strong>. On the new device, use <strong>Restore from Backup</strong>.</p>
             <h4 style="color:var(--accent); margin-bottom:5px;">🔒 Privacy</h4>
-            <p>Data stays locally on your device. Auto-saves during active sessions.</p>
+            <p>Data stays on your device. Auto-saves every 10 seconds during active sessions to prevent data loss. Please backup regularly.</p>
+            <h4 style="color:var(--accent); margin-bottom:5px;">📱 Install as App</h4>
+            <p>Tap <strong>Share</strong> (iOS) or <strong>Menu</strong> (Android) and select <strong>'Add to Home Screen'</strong>.</p>
         </div>
         <button class="btn secondary full-width" style="margin-top:20px;" onclick="showPage('setup')">Back to App</button>
     </div>
@@ -247,12 +239,9 @@
         } else if (choice === 'save') {
             const history = db.getHistory();
             history.push({ id: Date.now(), start: new Date(saved.startTime).toISOString(), end: new Date().toISOString(), duration: saved.elapsed, pointers: saved.pointers });
-            db.saveHistory(history);
-            db.clearActiveSession();
-            resetTimerUI();
+            db.saveHistory(history); db.clearActiveSession(); resetTimerUI();
         } else {
-            db.clearActiveSession();
-            resetTimerUI();
+            db.clearActiveSession(); resetTimerUI();
         }
     }
 
@@ -282,23 +271,16 @@
         ['pause-btn', 'stop-btn'].forEach(id => document.getElementById(id).classList.remove('hidden'));
         document.getElementById('session-status').innerText = "Session Active";
         if (timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(() => { 
-            elapsedSeconds = Math.floor((Date.now() - startTime) / 1000); 
-            updateTimerDisplay(); 
-        }, 1000);
+        timerInterval = setInterval(() => { elapsedSeconds = Math.floor((Date.now() - startTime) / 1000); updateTimerDisplay(); }, 1000);
         if (autosaveInterval) clearInterval(autosaveInterval);
-        autosaveInterval = setInterval(() => {
-            db.setActiveSession({ startTime, elapsed: elapsedSeconds, pointers: mainPointersEl.value });
-        }, 10000);
+        autosaveInterval = setInterval(() => { db.setActiveSession({ startTime, elapsed: elapsedSeconds, pointers: mainPointersEl.value }); }, 10000);
     }
 
     function togglePause() {
         if (!isPaused) {
             clearInterval(timerInterval); clearInterval(autosaveInterval);
-            isPaused = true;
-            document.getElementById('pause-btn').innerText = "Resume";
-            document.getElementById('session-status').innerText = "Paused";
-            releaseWakeLock();
+            isPaused = true; document.getElementById('pause-btn').innerText = "Resume";
+            document.getElementById('session-status').innerText = "Paused"; releaseWakeLock();
         } else {
             document.getElementById('pause-btn').innerText = "Pause"; startSession();
         }
@@ -335,16 +317,12 @@
         if (diff <= 0) return alert("End time error.");
         const history = db.getHistory();
         history.push({ id: Date.now(), start: s.toISOString(), end: e.toISOString(), duration: diff, pointers: document.getElementById('manual-pointers').value });
-        db.saveHistory(history);
-        db.clearActiveSession(); showPage('history');
+        db.saveHistory(history); db.clearActiveSession(); showPage('history');
     }
 
     function setDailyGoal() {
         const val = prompt("Set daily goal (minutes):", db.getGoal());
-        if (val !== null) {
-            db.setGoal(parseInt(val) || 0);
-            loadHistory();
-        }
+        if (val !== null) { db.setGoal(parseInt(val) || 0); loadHistory(); }
     }
 
     function toggleAdminTools() { document.getElementById('admin-tools').classList.toggle('open'); }
@@ -354,9 +332,7 @@
         const dates = [...new Set(history.map(h => new Date(h.start).toDateString()))];
         let streak = 0; let checkDate = new Date();
         if (!dates.includes(checkDate.toDateString())) checkDate.setDate(checkDate.getDate() - 1);
-        while (dates.includes(checkDate.toDateString())) {
-            streak++; checkDate.setDate(checkDate.getDate() - 1);
-        }
+        while (dates.includes(checkDate.toDateString())) { streak++; checkDate.setDate(checkDate.getDate() - 1); }
         return streak;
     }
 
@@ -380,7 +356,6 @@
         startOfWeek.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
         startOfWeek.setHours(0,0,0,0);
 
-        // Nested Grouping Logic
         const grouped = history.reduce((acc, item) => {
             const dayKey = new Date(item.start).toDateString();
             if (!acc[dayKey]) acc[dayKey] = { items: [], total: 0, date: new Date(item.start) };
@@ -411,23 +386,29 @@
 
             const dayEl = document.createElement('div');
             dayEl.className = "history-day-group";
+            dayEl.id = `group-${dayId}`;
             dayEl.innerHTML = `
                 <div class="day-summary" onclick="toggleDay('${dayId}')">
-                    <span style="font-size:0.95rem">${d.toLocaleDateString([], {day:'numeric', month:'short'})}</span>
+                    <div><span class="chevron">▸</span><span style="font-size:0.95rem">${d.toLocaleDateString([], {day:'numeric', month:'short'})}</span></div>
                     <span style="font-weight:bold; color:${colorClass};">${Math.round(day.total)}m</span>
                 </div>
                 <div id="day-${dayId}" class="sessions-container">
                     ${day.items.map(item => `
                         <div class="session-item">
                             <div class="session-meta">
-                                <span onclick="editTime(${item.id})">${new Date(item.start).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
-                                <span onclick="editDuration(${item.id})" style="color:var(--accent); font-weight:bold">${Math.round(item.duration/60)}m</span>
+                                <span class="clickable-item" onclick="triggerTimePicker(event, ${item.id})">
+                                    ${new Date(item.start).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}
+                                </span>
+                                <span class="clickable-item" onclick="editDuration(${item.id})">
+                                    ${Math.round(item.duration/60)}m
+                                </span>
                             </div>
                             <span class="editable-text" contenteditable="true" onblur="updateNotes(${item.id}, this)">${item.pointers || "Tap to add notes..."}</span>
                             <div class="action-bar">
                                 <button class="action-btn" onclick="copyText('${item.id}')">📋 Copy</button>
                                 <button class="action-btn" style="background:#422;" onclick="deleteItem(${item.id})">🗑️ Delete</button>
                             </div>
+                            <input type="datetime-local" id="picker-${item.id}" class="ghost-input" onchange="saveTimeFromPicker(${item.id}, this)">
                         </div>
                     `).join('')}
                 </div>`;
@@ -441,8 +422,29 @@
         document.getElementById('stat-count').innerText = `Sessions: ${history.length}`;
     }
 
-    function toggleDay(id) { document.getElementById(`day-${id}`).classList.toggle('expanded'); }
+    function toggleDay(id) {
+        document.getElementById(`day-${id}`).classList.toggle('expanded');
+        document.getElementById(`group-${id}`).classList.toggle('expanded');
+    }
     
+    function triggerTimePicker(event, id) {
+        event.stopPropagation();
+        const picker = document.getElementById(`picker-${id}`);
+        const history = db.getHistory();
+        const item = history.find(h => h.id === id);
+        const localDate = new Date(item.start);
+        picker.value = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        picker.showPicker();
+    }
+
+    function saveTimeFromPicker(id, el) {
+        if (!el.value) return;
+        const history = db.getHistory();
+        const idx = history.findIndex(h => h.id === id);
+        history[idx].start = new Date(el.value).toISOString();
+        db.saveHistory(history); loadHistory();
+    }
+
     function updateNotes(id, el) {
         const history = db.getHistory();
         const idx = history.findIndex(h => h.id === id);
@@ -452,16 +454,8 @@
     function editDuration(id) {
         const history = db.getHistory();
         const idx = history.findIndex(h => h.id === id);
-        const newVal = prompt("Enter duration in minutes:", Math.round(history[idx].duration/60));
-        if (newVal) { history[idx].duration = parseInt(newVal) * 60; db.saveHistory(history); loadHistory(); }
-    }
-
-    function editTime(id) {
-        const history = db.getHistory();
-        const idx = history.findIndex(h => h.id === id);
-        const current = new Date(history[idx].start).toISOString().slice(0,16);
-        const newVal = prompt("Edit date/time (YYYY-MM-DDTHH:MM):", current);
-        if (newVal) { history[idx].start = new Date(newVal).toISOString(); db.saveHistory(history); loadHistory(); }
+        const newVal = prompt("Edit session duration (minutes):", Math.round(history[idx].duration/60));
+        if (newVal !== null) { history[idx].duration = parseInt(newVal) * 60; db.saveHistory(history); loadHistory(); }
     }
 
     function deleteItem(id) { if(confirm("Delete session?")) { db.saveHistory(db.getHistory().filter(h => h.id !== id)); loadHistory(); } }
