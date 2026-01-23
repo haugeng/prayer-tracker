@@ -499,16 +499,16 @@
     }
     
     function restoreJSON(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+        const file = e.target.files[0];
+        if (!file) return;
 
-    const r = new FileReader();
-    r.onload = ev => {
-        try {
-            const imported = JSON.parse(ev.target.result);
+        const r = new FileReader();
+        r.onload = ev => {
+            try {
+                const imported = JSON.parse(ev.target.result);
             
             // Validation: Ensure the file actually contains history
-            if (imported.history && Array.isArray(imported.history)) {
+              if (imported.history && Array.isArray(imported.history)) {
                 db.saveHistory(imported.history);
                 if (imported.dailyGoal) db.setGoal(imported.dailyGoal);
                 if (imported.mainPointers) db.savePointers(imported.mainPointers);
@@ -516,16 +516,16 @@
                 // Update the UI without refreshing the whole page
                 loadHistory(); 
                 alert("Backup restored successfully!");
-            } else {
+              } else {
                 alert("Invalid backup file format.");
+              }
+            } catch (err) {
+                alert("Error reading file: " + err.message);
             }
-        } catch (err) {
-            alert("Error reading file: " + err.message);
-        }
         // Reset the file input so you can import the same file again if needed
-        e.target.value = ''; 
-    };
-    r.readAsText(file);
+            e.target.value = ''; 
+        };
+        r.readAsText(file);
     }
     
     function exportToCSV() {
