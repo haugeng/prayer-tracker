@@ -16,7 +16,7 @@
         }
         .container { width: 100%; max-width: 500px; padding-bottom: 50px; }
         
-        /* Navigation & Headers */
+        /* Headers & Nav */
         .header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .help-icon { 
             background: #333; color: var(--text); width: 32px; height: 32px; 
@@ -50,7 +50,7 @@
         .success { background: var(--success); color: #000; }
         .full-width { width: 100%; margin-top: 10px; }
 
-        /* Dashboard & History Logic */
+        /* Dashboard */
         .dash-card { background: var(--card); border-radius: 15px; padding: 15px; margin-bottom: 10px; border: 1px solid #333; }
         .dash-main { display: flex; justify-content: space-around; align-items: center; margin-bottom: 15px; }
         .dash-item { text-align: center; flex: 1; }
@@ -75,7 +75,7 @@
         #recovery-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
         .recovery-card { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid var(--accent); text-align: center; max-width: 400px; width: 100%; }
 
-        /* Grouped History List */
+        /* History List Styles */
         .history-day-group { border-bottom: 1px solid #222; }
         .day-summary { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; cursor: pointer; }
         .sessions-container { max-height: 0; overflow: hidden; transition: all 0.3s ease; background: #161616; border-radius: 10px; }
@@ -182,15 +182,13 @@
     <div id="about-page" class="hidden">
         <h3>User Guide</h3>
         <div style="line-height: 1.7; color: #bbb;">
-            <p style="color: var(--text); font-size: 0.95rem; margin-bottom: 25px; opacity: 0.9; line-height: 1.6;">A lightweight, private, and distraction-free web app designed to help you track your prayer sessions and keep a digital journal of your prayer pointers.</p>
+            <p style="color: var(--text); font-size: 0.95rem; margin-bottom: 25px; opacity: 0.9; line-height: 1.6;">A lightweight tracker for prayer sessions and digital journaling.</p>
             <h4 style="color:var(--accent); margin-bottom:5px;">📖 Manual Logging</h4>
-            <p>Missed a session? Use the <strong>Log</strong> tab to backdate entries. Simply select your start and end times, paste your pointers, and save.</p>
+            <p>Use the <strong>Log</strong> tab to backdate entries manually.</p>
             <h4 style="color:var(--accent); margin-bottom:5px;">📲 Transferring Data</h4>
-            <p>To move data: History > <strong>Download JSON Backup</strong>. On the new device, use <strong>Restore from Backup</strong>.</p>
+            <p>Use <strong>JSON Backup</strong> to move data between devices.</p>
             <h4 style="color:var(--accent); margin-bottom:5px;">🔒 Privacy</h4>
-            <p>Data stays on your device. Auto-saves every 10 seconds during active sessions to prevent data loss. Please backup regularly.</p>
-            <h4 style="color:var(--accent); margin-bottom:5px;">📱 Install as App</h4>
-            <p>Tap <strong>Share</strong> (iOS) or <strong>Menu</strong> (Android) and select <strong>'Add to Home Screen'</strong>.</p>
+            <p>Data stays locally on your device. Auto-saves every 10 seconds during sessions.</p>
         </div>
         <button class="btn secondary full-width" style="margin-top:20px;" onclick="showPage('setup')">Back to App</button>
     </div>
@@ -210,6 +208,7 @@
     };
 
     let timerInterval, autosaveInterval, elapsedSeconds = 0, isPaused = false, startTime = null, wakeLock = null;
+    let currentlyOpenDay = null; // Memory for expanded rows
 
     const mainPointersEl = document.getElementById('main-pointers');
     mainPointersEl.value = db.getPointers();
@@ -415,6 +414,16 @@
             list.appendChild(dayEl);
         });
 
+        // RE-EXPAND LOGIC: Check if we had a day open
+        if (currentlyOpenDay) {
+            const dayEl = document.getElementById(`day-${currentlyOpenDay}`);
+            const groupEl = document.getElementById(`group-${currentlyOpenDay}`);
+            if (dayEl && groupEl) {
+                dayEl.classList.add('expanded');
+                groupEl.classList.add('expanded');
+            }
+        }
+
         document.getElementById('dash-streak').innerText = calculateStreak(history);
         document.getElementById('dash-goal-val').innerText = goal + "m";
         document.getElementById('dash-week-total').innerText = formatDuration(weeklyMins);
@@ -423,8 +432,24 @@
     }
 
     function toggleDay(id) {
-        document.getElementById(`day-${id}`).classList.toggle('expanded');
-        document.getElementById(`group-${id}`).classList.toggle('expanded');
+        const dayEl = document.getElementById(`day-${id}`);
+        const groupEl = document.getElementById(`group-${id}`);
+        if (dayEl.classList.contains('expanded')) {
+            dayEl.classList.remove('expanded');
+            groupEl.classList.remove('expanded');
+            currentlyOpenDay = null;
+        } else {
+            // Optional: collapse other days if you want focus on one
+            if (currentlyOpenDay) {
+                const prevDay = document.getElementById(`day-${currentlyOpenDay}`);
+                const prevGrp = document.getElementById(`group-${currentlyOpenDay}`);
+                if (prevDay) prevDay.classList.remove('expanded');
+                if (prevGrp) prevGrp.classList.remove('expanded');
+            }
+            dayEl.classList.add('expanded');
+            groupEl.classList.add('expanded');
+            currentlyOpenDay = id;
+        }
     }
     
     function triggerTimePicker(event, id) {
