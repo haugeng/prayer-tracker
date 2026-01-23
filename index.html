@@ -35,7 +35,6 @@
             border: 1px solid #444; border-radius: 12px; padding: 14px;
             box-sizing: border-box; font-size: 16px; margin-bottom: 12px;
         }
-        /* Fixed: Restored Manual Heights */
         #main-pointers { height: 264px; resize: none; line-height: 1.5; }
         #manual-pointers { height: 180px; resize: none; }
 
@@ -52,6 +51,29 @@
         .success { background: var(--success); color: #000; }
         .full-width { width: 100%; margin-top: 10px; }
 
+        /* Dashboard Styles */
+        .dash-card { background: var(--card); border-radius: 15px; padding: 15px; margin-bottom: 10px; border: 1px solid #333; }
+        .dash-main { display: flex; justify-content: space-around; align-items: center; margin-bottom: 15px; }
+        .dash-item { text-align: center; flex: 1; }
+        .dash-val { display: block; font-size: 1.4rem; font-weight: bold; color: var(--accent); white-space: nowrap; }
+        .dash-lbl { font-size: 0.65rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; display: block; }
+        .dash-footer { display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid #333; font-size: 0.75rem; color: #666; }
+
+        /* Admin Tools Slider */
+        .admin-toggle { 
+            background: transparent; color: #888; border: 1px solid #333; border-radius: 8px; 
+            padding: 8px; font-size: 0.75rem; width: 100%; cursor: pointer; margin-bottom: 10px;
+        }
+        #admin-tools { 
+            max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; 
+            display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;
+        }
+        #admin-tools.open { max-height: 300px; padding-bottom: 10px; border-bottom: 1px solid #333; }
+
+        /* Grouping Styles */
+        .year-head { font-size: 1.3rem; font-weight: bold; color: var(--accent); margin: 20px 0 5px 0; }
+        .month-head { font-size: 0.85rem; color: #888; text-transform: uppercase; margin: 10px 0 5px 0; border-bottom: 1px solid #222; padding-bottom: 4px; }
+
         #recovery-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); z-index: 100;
@@ -61,11 +83,6 @@
             background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid var(--accent);
             text-align: center; max-width: 400px; width: 100%;
         }
-
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        .stat-card { background: var(--card); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #333; }
-        .stat-val { display: block; font-size: 1.4rem; font-weight: bold; color: var(--success); }
-        .stat-lbl { font-size: 0.65rem; color: #888; text-transform: uppercase; }
 
         .history-row { border-bottom: 1px solid #222; }
         .row-summary { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; }
@@ -137,18 +154,36 @@
     </div>
 
     <div id="history-page" class="hidden">
-        <h3>Statistics</h3>
-        <div class="stats-grid">
-            <div class="stat-card"><span id="stat-total-mins" class="stat-val">0</span><span class="stat-lbl">Total Mins</span></div>
-            <div class="stat-card"><span id="stat-count" class="stat-val">0</span><span class="stat-lbl">Sessions</span></div>
+        <div class="dash-card">
+            <div class="dash-main">
+                <div class="dash-item">
+                    <span id="dash-week-total" class="dash-val">0m</span>
+                    <span class="dash-lbl">This Week (M-S)</span>
+                </div>
+                <div class="dash-item" onclick="setDailyGoal()" style="cursor:pointer">
+                    <span id="dash-goal-val" class="dash-val">0m</span>
+                    <span class="dash-lbl">Daily Goal 🎯</span>
+                </div>
+                <div class="dash-item">
+                    <span id="dash-streak" class="dash-val">0</span>
+                    <span class="dash-lbl">Streak 🔥</span>
+                </div>
+            </div>
+            <div class="dash-footer">
+                <span id="stat-total-mins">Total: 0m</span>
+                <span id="stat-count">Sessions: 0</span>
+            </div>
         </div>
-        <div id="history-list"></div>
-        <div style="margin-top: 40px; border-top: 1px solid #333; padding-top: 20px; display: flex; flex-direction: column; gap: 10px;">
-            <button class="btn secondary" onclick="exportToCSV()">📊 Export to CSV</button>
-            <button class="btn secondary" onclick="backupJSON()">💾 Download JSON Backup</button>
-            <button class="btn secondary" onclick="document.getElementById('importFile').click()">📂 Restore from Backup</button>
+
+        <button class="admin-toggle" onclick="toggleAdminTools()">⚙️ Data & Backups</button>
+        <div id="admin-tools">
+            <button class="btn secondary" style="padding:10px; font-size:0.8rem" onclick="exportToCSV()">📊 Export to CSV</button>
+            <button class="btn secondary" style="padding:10px; font-size:0.8rem" onclick="backupJSON()">💾 Download JSON Backup</button>
+            <button class="btn secondary" style="padding:10px; font-size:0.8rem" onclick="document.getElementById('importFile').click()">📂 Restore from Backup</button>
             <input type="file" id="importFile" class="hidden" accept=".json" onchange="restoreJSON(event)">
         </div>
+
+        <div id="history-list"></div>
     </div>
 
     <div id="about-page" class="hidden">
@@ -176,7 +211,9 @@
         savePointers: (txt) => localStorage.setItem('mainPointers', txt),
         getActiveSession: () => JSON.parse(localStorage.getItem('activeSession')),
         setActiveSession: (data) => localStorage.setItem('activeSession', JSON.stringify(data)),
-        clearActiveSession: () => localStorage.removeItem('activeSession')
+        clearActiveSession: () => localStorage.removeItem('activeSession'),
+        getGoal: () => parseInt(localStorage.getItem('dailyGoal') || "0"),
+        setGoal: (val) => localStorage.setItem('dailyGoal', val)
     };
 
     let timerInterval, autosaveInterval, elapsedSeconds = 0, isPaused = false, startTime = null, wakeLock = null;
@@ -301,20 +338,84 @@
         db.clearActiveSession(); showPage('history');
     }
 
+    function setDailyGoal() {
+        const val = prompt("Set daily goal (minutes):", db.getGoal());
+        if (val !== null) {
+            db.setGoal(parseInt(val) || 0);
+            loadHistory();
+        }
+    }
+
+    function toggleAdminTools() {
+        document.getElementById('admin-tools').classList.toggle('open');
+    }
+
+    function calculateStreak(history) {
+        if (!history.length) return 0;
+        const dates = [...new Set(history.map(h => new Date(h.start).toDateString()))];
+        let streak = 0;
+        let checkDate = new Date();
+        if (!dates.includes(checkDate.toDateString())) {
+            checkDate.setDate(checkDate.getDate() - 1);
+        }
+        while (dates.includes(checkDate.toDateString())) {
+            streak++;
+            checkDate.setDate(checkDate.getDate() - 1);
+        }
+        return streak;
+    }
+
+    function formatDuration(totalMins) {
+        const mins = Math.round(totalMins);
+        if (mins < 60) return mins + "m";
+        return `${Math.floor(mins / 60)}h ${mins % 60}m`;
+    }
+
     function loadHistory() {
         let history = db.getHistory().sort((a, b) => new Date(b.start) - new Date(a.start));
         const list = document.getElementById('history-list');
-        list.innerHTML = ""; let mins = 0;
+        const goal = db.getGoal();
+        list.innerHTML = "";
+        
+        let totalMins = 0;
+        let weeklyMins = 0;
+        let lastYear = null, lastMonth = null;
+        
+        const now = new Date();
+        const day = now.getDay();
+        const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+        const startOfWeek = new Date(now.setDate(diff));
+        startOfWeek.setHours(0,0,0,0);
+
         history.forEach(item => {
-            mins += (item.duration / 60);
             const d = new Date(item.start);
+            const itemMins = (item.duration / 60);
+            totalMins += itemMins;
+            if (d >= startOfWeek) weeklyMins += itemMins;
+
+            const year = d.getFullYear();
+            const month = d.toLocaleString('default', { month: 'long' });
+
+            if (year !== lastYear) {
+                const yEl = document.createElement('div');
+                yEl.className = "year-head"; yEl.innerText = year;
+                list.appendChild(yEl); lastYear = year;
+            }
+            if (month !== lastMonth || year !== lastYear) {
+                const mEl = document.createElement('div');
+                mEl.className = "month-head"; mEl.innerText = month;
+                list.appendChild(mEl); lastMonth = month;
+            }
+
+            const colorClass = (goal > 0 && itemMins >= goal) ? 'var(--success)' : (goal > 0 ? '#888' : 'var(--success)');
+
             const itemEl = document.createElement('div');
             itemEl.className = "history-row";
             itemEl.innerHTML = `
                 <div class="row-summary">
-                    <span>${d.toLocaleDateString([], {month:'short', day:'numeric'})}</span>
+                    <span style="font-size:0.9rem">${d.toLocaleDateString([], {day:'numeric', month:'short'})}</span>
                     <div class="toggle-zone" onclick="toggleRow(${item.id})"></div>
-                    <span style="font-weight:bold; color:var(--success);">${Math.round(item.duration / 60)}m</span>
+                    <span style="font-weight:bold; color:${colorClass};">${Math.round(itemMins)}m</span>
                 </div>
                 <div id="container-${item.id}" class="pointer-container">
                     <div class="pointer-cell" id="ptr-${item.id}">${item.pointers || "No notes..."}</div>
@@ -325,28 +426,39 @@
                 </div>`;
             list.appendChild(itemEl);
         });
-        document.getElementById('stat-total-mins').innerText = Math.floor(mins);
-        document.getElementById('stat-count').innerText = history.length;
+
+        document.getElementById('dash-streak').innerText = calculateStreak(history);
+        document.getElementById('dash-goal-val').innerText = goal + "m";
+        document.getElementById('dash-week-total').innerText = formatDuration(weeklyMins);
+        document.getElementById('stat-total-mins').innerText = `Total: ${formatDuration(totalMins)}`;
+        document.getElementById('stat-count').innerText = `Sessions: ${history.length}`;
     }
     
     function copyRecord(id) {
         const txt = document.getElementById(`ptr-${id}`).innerText;
         navigator.clipboard.writeText(txt).then(() => alert("Notes copied to clipboard."));
     }
-
     function toggleRow(id) { document.getElementById(`container-${id}`).classList.toggle('expanded'); }
     function deleteRecord(id) { if(confirm("Delete?")) { db.saveHistory(db.getHistory().filter(h => h.id !== id)); loadHistory(); } }
+    
     function backupJSON() {
+        const data = { history: db.getHistory(), dailyGoal: db.getGoal(), mainPointers: db.getPointers() };
         const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([localStorage.getItem('prayerHistory') || "[]"], {type:'application/json'}));
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], {type:'application/json'}));
         a.download = `prayer_backup_${new Date().toISOString().slice(0,10)}.json`;
         a.click();
     }
     function restoreJSON(e) {
         const r = new FileReader();
         r.onload = ev => {
-            let merged = [...JSON.parse(ev.target.result), ...db.getHistory()].filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
-            db.saveHistory(merged); loadHistory();
+            const imported = JSON.parse(ev.target.result);
+            if (imported.history) {
+                let merged = [...imported.history, ...db.getHistory()].filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
+                db.saveHistory(merged);
+            }
+            if (imported.dailyGoal) db.setGoal(imported.dailyGoal);
+            if (imported.mainPointers) db.savePointers(imported.mainPointers);
+            location.reload();
         };
         r.readAsText(e.target.files[0]);
     }
@@ -361,4 +473,5 @@
     }
 </script>
 </body>
-</html>                                                                                                                         
+</html>
+ 
