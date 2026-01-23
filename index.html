@@ -185,8 +185,12 @@
             <p style="color: var(--text); font-size: 0.95rem; margin-bottom: 25px; opacity: 0.9; line-height: 1.6;">A lightweight tracker for prayer sessions and digital journaling.</p>
             <h4 style="color:var(--accent); margin-bottom:5px;">📖 Manual Logging</h4>
             <p>Use the <strong>Log</strong> tab to backdate entries manually.</p>
-            <h4 style="color:var(--accent); margin-bottom:5px;">📲 Transferring Data</h4>
-            <p>Use <strong>JSON Backup</strong> to move data between devices.</p>
+            <h4 style="color:var(--accent); margin-bottom:5px;">🎯 Daily Goals</h4>
+            <p>In <strong>History</strong>, tap the dashed Goal value to set your target. Days that meet this goal turn <strong>Green</strong>.</p>
+            <h4 style="color:var(--accent); margin-bottom:5px;">▾ Interactive History</h4>
+            <p>Tap the chevron to expand a day. Tap <strong>Dashed Underlines</strong> to edit times or durations. Edit notes directly by tapping the text.</p>
+            <h4 style="color:var(--accent); margin-bottom:5px;">📲 Data Backup</h4>
+            <p>Use <strong>JSON Backup</strong> to move data. Tap <strong>Restore</strong> to import old logs.</p>
             <h4 style="color:var(--accent); margin-bottom:5px;">🔒 Privacy</h4>
             <p>Data stays locally on your device. Auto-saves every 10 seconds during sessions.</p>
         </div>
@@ -208,7 +212,7 @@
     };
 
     let timerInterval, autosaveInterval, elapsedSeconds = 0, isPaused = false, startTime = null, wakeLock = null;
-    let currentlyOpenDay = null; // Memory for expanded rows
+    let currentlyOpenDay = null; 
 
     const mainPointersEl = document.getElementById('main-pointers');
     mainPointersEl.value = db.getPointers();
@@ -414,7 +418,6 @@
             list.appendChild(dayEl);
         });
 
-        // RE-EXPAND LOGIC: Check if we had a day open
         if (currentlyOpenDay) {
             const dayEl = document.getElementById(`day-${currentlyOpenDay}`);
             const groupEl = document.getElementById(`group-${currentlyOpenDay}`);
@@ -439,7 +442,6 @@
             groupEl.classList.remove('expanded');
             currentlyOpenDay = null;
         } else {
-            // Optional: collapse other days if you want focus on one
             if (currentlyOpenDay) {
                 const prevDay = document.getElementById(`day-${currentlyOpenDay}`);
                 const prevGrp = document.getElementById(`group-${currentlyOpenDay}`);
@@ -497,37 +499,27 @@
         a.download = `prayer_backup_${new Date().toISOString().slice(0,10)}.json`;
         a.click();
     }
-    
+
     function restoreJSON(e) {
         const file = e.target.files[0];
         if (!file) return;
-
         const r = new FileReader();
         r.onload = ev => {
             try {
                 const imported = JSON.parse(ev.target.result);
-            
-            // Validation: Ensure the file actually contains history
-              if (imported.history && Array.isArray(imported.history)) {
-                db.saveHistory(imported.history);
+                if (imported.history) db.saveHistory(imported.history);
                 if (imported.dailyGoal) db.setGoal(imported.dailyGoal);
                 if (imported.mainPointers) db.savePointers(imported.mainPointers);
-                
-                // Update the UI without refreshing the whole page
                 loadHistory(); 
                 alert("Backup restored successfully!");
-              } else {
-                alert("Invalid backup file format.");
-              }
             } catch (err) {
-                alert("Error reading file: " + err.message);
+                alert("Error restoring backup.");
             }
-        // Reset the file input so you can import the same file again if needed
             e.target.value = ''; 
         };
         r.readAsText(file);
     }
-    
+
     function exportToCSV() {
         const history = db.getHistory();
         let csv = "Date,Duration(Min),Notes\n";
