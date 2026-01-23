@@ -51,7 +51,6 @@
         .success { background: var(--success); color: #000; }
         .full-width { width: 100%; margin-top: 10px; }
 
-        /* Dashboard Styles */
         .dash-card { background: var(--card); border-radius: 15px; padding: 15px; margin-bottom: 10px; border: 1px solid #333; }
         .dash-main { display: flex; justify-content: space-around; align-items: center; margin-bottom: 15px; }
         .dash-item { text-align: center; flex: 1; }
@@ -59,7 +58,9 @@
         .dash-lbl { font-size: 0.65rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; display: block; }
         .dash-footer { display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid #333; font-size: 0.75rem; color: #666; }
 
-        /* Admin Tools Slider */
+        /* Indicator for Clickable Goal */
+        .clickable-goal { text-decoration: underline dashed var(--accent); text-underline-offset: 4px; }
+
         .admin-toggle { 
             background: transparent; color: #888; border: 1px solid #333; border-radius: 8px; 
             padding: 8px; font-size: 0.75rem; width: 100%; cursor: pointer; margin-bottom: 10px;
@@ -70,7 +71,6 @@
         }
         #admin-tools.open { max-height: 300px; padding-bottom: 10px; border-bottom: 1px solid #333; }
 
-        /* Grouping Styles */
         .year-head { font-size: 1.3rem; font-weight: bold; color: var(--accent); margin: 20px 0 5px 0; }
         .month-head { font-size: 0.85rem; color: #888; text-transform: uppercase; margin: 10px 0 5px 0; border-bottom: 1px solid #222; padding-bottom: 4px; }
 
@@ -84,16 +84,19 @@
             text-align: center; max-width: 400px; width: 100%;
         }
 
-        .history-row { border-bottom: 1px solid #222; }
-        .row-summary { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; }
-        .toggle-zone { flex-grow: 1; align-self: stretch; cursor: pointer; min-width: 20px; }
+        .history-day-group { border-bottom: 1px solid #222; }
+        .day-summary { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; cursor: pointer; }
         
-        .pointer-container { max-height: 0; overflow: hidden; transition: all 0.3s ease; background: #161616; border-radius: 10px; }
-        .pointer-container.expanded { max-height: 1000px; padding: 15px; margin-bottom: 15px; border: 1px solid #333; }
-        .pointer-cell { white-space: pre-wrap; color: #ccc; outline: none; font-style: italic; line-height: 1.6; font-size: 14px; }
+        .sessions-container { max-height: 0; overflow: hidden; transition: all 0.3s ease; background: #161616; border-radius: 10px; }
+        .sessions-container.expanded { max-height: 2000px; padding: 10px; margin-bottom: 15px; border: 1px solid #333; }
         
-        .action-bar { display: flex; gap: 10px; margin-top: 15px; padding-top: 12px; border-top: 1px solid #333; }
-        .action-btn { background: #333; color: #eee; font-size: 11px; padding: 8px 12px; border-radius: 6px; border: none; flex: 1; cursor: pointer; }
+        .session-item { border-bottom: 1px solid #222; padding: 12px 0; }
+        .session-item:last-child { border-bottom: none; }
+        .session-meta { display: flex; justify-content: space-between; font-size: 0.75rem; color: #888; margin-bottom: 8px; }
+        .editable-text { white-space: pre-wrap; color: #ccc; outline: none; font-style: italic; line-height: 1.6; font-size: 14px; width: 100%; display: block; }
+        
+        .action-bar { display: flex; gap: 10px; margin-top: 10px; }
+        .action-btn { background: #333; color: #eee; font-size: 11px; padding: 6px 10px; border-radius: 4px; border: none; cursor: pointer; }
         .verse-footer { margin-top: 30px; text-align: center; font-size: 0.8rem; color: #555; font-style: italic; }
         .hidden { display: none !important; }
     </style>
@@ -161,7 +164,7 @@
                     <span class="dash-lbl">This Week (M-S)</span>
                 </div>
                 <div class="dash-item" onclick="setDailyGoal()" style="cursor:pointer">
-                    <span id="dash-goal-val" class="dash-val">0m</span>
+                    <span id="dash-goal-val" class="dash-val clickable-goal">0m</span>
                     <span class="dash-lbl">Daily Goal 🎯</span>
                 </div>
                 <div class="dash-item">
@@ -189,15 +192,13 @@
     <div id="about-page" class="hidden">
         <h3>User Guide</h3>
         <div style="line-height: 1.7; color: #bbb;">
-            <p style="color: var(--text); font-size: 0.95rem; margin-bottom: 25px; opacity: 0.9; line-height: 1.6;">A lightweight, private, and distraction-free web app designed to help you track your prayer sessions and keep a digital journal of your prayer pointers.</p>
+            <p style="color: var(--text); font-size: 0.95rem; margin-bottom: 25px; opacity: 0.9; line-height: 1.6;">A lightweight, private tracker for prayer sessions and reflections.</p>
             <h4 style="color:var(--accent); margin-bottom:5px;">📖 Manual Logging</h4>
-            <p>Missed a session? Use the <strong>Log</strong> tab to backdate entries. Simply select your start and end times, paste your pointers, and save.</p>
+            <p>Use the <strong>Log</strong> tab to backdate entries manually.</p>
             <h4 style="color:var(--accent); margin-bottom:5px;">📲 Transferring Data</h4>
-            <p>To move data: History > <strong>Download JSON Backup</strong>. On the new device, use <strong>Restore from Backup</strong>.</p>
+            <p>Use <strong>JSON Backup</strong> to move data between devices.</p>
             <h4 style="color:var(--accent); margin-bottom:5px;">🔒 Privacy</h4>
-            <p>Data stays on your device. Auto-saves every 10 seconds during active sessions to prevent data loss. Please backup regularly.</p>
-            <h4 style="color:var(--accent); margin-bottom:5px;">📱 Install as App</h4>
-            <p>Tap <strong>Share</strong> (iOS) or <strong>Menu</strong> (Android) and select <strong>'Add to Home Screen'</strong>.</p>
+            <p>Data stays locally on your device. Auto-saves during active sessions.</p>
         </div>
         <button class="btn secondary full-width" style="margin-top:20px;" onclick="showPage('setup')">Back to App</button>
     </div>
@@ -346,21 +347,15 @@
         }
     }
 
-    function toggleAdminTools() {
-        document.getElementById('admin-tools').classList.toggle('open');
-    }
+    function toggleAdminTools() { document.getElementById('admin-tools').classList.toggle('open'); }
 
     function calculateStreak(history) {
         if (!history.length) return 0;
         const dates = [...new Set(history.map(h => new Date(h.start).toDateString()))];
-        let streak = 0;
-        let checkDate = new Date();
-        if (!dates.includes(checkDate.toDateString())) {
-            checkDate.setDate(checkDate.getDate() - 1);
-        }
+        let streak = 0; let checkDate = new Date();
+        if (!dates.includes(checkDate.toDateString())) checkDate.setDate(checkDate.getDate() - 1);
         while (dates.includes(checkDate.toDateString())) {
-            streak++;
-            checkDate.setDate(checkDate.getDate() - 1);
+            streak++; checkDate.setDate(checkDate.getDate() - 1);
         }
         return streak;
     }
@@ -377,54 +372,66 @@
         const goal = db.getGoal();
         list.innerHTML = "";
         
-        let totalMins = 0;
-        let weeklyMins = 0;
+        let totalMins = 0; let weeklyMins = 0;
         let lastYear = null, lastMonth = null;
         
         const now = new Date();
-        const day = now.getDay();
-        const diff = now.getDate() - day + (day === 0 ? -6 : 1);
-        const startOfWeek = new Date(now.setDate(diff));
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
         startOfWeek.setHours(0,0,0,0);
 
-        history.forEach(item => {
-            const d = new Date(item.start);
-            const itemMins = (item.duration / 60);
-            totalMins += itemMins;
-            if (d >= startOfWeek) weeklyMins += itemMins;
+        // Nested Grouping Logic
+        const grouped = history.reduce((acc, item) => {
+            const dayKey = new Date(item.start).toDateString();
+            if (!acc[dayKey]) acc[dayKey] = { items: [], total: 0, date: new Date(item.start) };
+            acc[dayKey].items.push(item);
+            acc[dayKey].total += (item.duration / 60);
+            return acc;
+        }, {});
+
+        Object.values(grouped).forEach(day => {
+            const d = day.date;
+            totalMins += day.total;
+            if (d >= startOfWeek) weeklyMins += day.total;
 
             const year = d.getFullYear();
             const month = d.toLocaleString('default', { month: 'long' });
 
             if (year !== lastYear) {
-                const yEl = document.createElement('div');
-                yEl.className = "year-head"; yEl.innerText = year;
+                const yEl = document.createElement('div'); yEl.className = "year-head"; yEl.innerText = year;
                 list.appendChild(yEl); lastYear = year;
             }
             if (month !== lastMonth || year !== lastYear) {
-                const mEl = document.createElement('div');
-                mEl.className = "month-head"; mEl.innerText = month;
+                const mEl = document.createElement('div'); mEl.className = "month-head"; mEl.innerText = month;
                 list.appendChild(mEl); lastMonth = month;
             }
 
-            const colorClass = (goal > 0 && itemMins >= goal) ? 'var(--success)' : (goal > 0 ? '#888' : 'var(--success)');
+            const dayId = d.getTime();
+            const colorClass = (goal > 0 && day.total >= goal) ? 'var(--success)' : (goal > 0 ? '#888' : 'var(--success)');
 
-            const itemEl = document.createElement('div');
-            itemEl.className = "history-row";
-            itemEl.innerHTML = `
-                <div class="row-summary">
-                    <span style="font-size:0.9rem">${d.toLocaleDateString([], {day:'numeric', month:'short'})}</span>
-                    <div class="toggle-zone" onclick="toggleRow(${item.id})"></div>
-                    <span style="font-weight:bold; color:${colorClass};">${Math.round(itemMins)}m</span>
+            const dayEl = document.createElement('div');
+            dayEl.className = "history-day-group";
+            dayEl.innerHTML = `
+                <div class="day-summary" onclick="toggleDay('${dayId}')">
+                    <span style="font-size:0.95rem">${d.toLocaleDateString([], {day:'numeric', month:'short'})}</span>
+                    <span style="font-weight:bold; color:${colorClass};">${Math.round(day.total)}m</span>
                 </div>
-                <div id="container-${item.id}" class="pointer-container">
-                    <div class="pointer-cell" id="ptr-${item.id}">${item.pointers || "No notes..."}</div>
-                    <div class="action-bar">
-                        <button class="action-btn" onclick="copyRecord(${item.id})">📋 Copy</button>
-                        <button class="action-btn" style="background:#422;" onclick="deleteRecord(${item.id})">🗑️ Delete</button>
-                    </div>
+                <div id="day-${dayId}" class="sessions-container">
+                    ${day.items.map(item => `
+                        <div class="session-item">
+                            <div class="session-meta">
+                                <span onclick="editTime(${item.id})">${new Date(item.start).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                                <span onclick="editDuration(${item.id})" style="color:var(--accent); font-weight:bold">${Math.round(item.duration/60)}m</span>
+                            </div>
+                            <span class="editable-text" contenteditable="true" onblur="updateNotes(${item.id}, this)">${item.pointers || "Tap to add notes..."}</span>
+                            <div class="action-bar">
+                                <button class="action-btn" onclick="copyText('${item.id}')">📋 Copy</button>
+                                <button class="action-btn" style="background:#422;" onclick="deleteItem(${item.id})">🗑️ Delete</button>
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>`;
-            list.appendChild(itemEl);
+            list.appendChild(dayEl);
         });
 
         document.getElementById('dash-streak').innerText = calculateStreak(history);
@@ -433,14 +440,37 @@
         document.getElementById('stat-total-mins').innerText = `Total: ${formatDuration(totalMins)}`;
         document.getElementById('stat-count').innerText = `Sessions: ${history.length}`;
     }
+
+    function toggleDay(id) { document.getElementById(`day-${id}`).classList.toggle('expanded'); }
     
-    function copyRecord(id) {
-        const txt = document.getElementById(`ptr-${id}`).innerText;
-        navigator.clipboard.writeText(txt).then(() => alert("Notes copied to clipboard."));
+    function updateNotes(id, el) {
+        const history = db.getHistory();
+        const idx = history.findIndex(h => h.id === id);
+        if (idx > -1) { history[idx].pointers = el.innerText; db.saveHistory(history); }
     }
-    function toggleRow(id) { document.getElementById(`container-${id}`).classList.toggle('expanded'); }
-    function deleteRecord(id) { if(confirm("Delete?")) { db.saveHistory(db.getHistory().filter(h => h.id !== id)); loadHistory(); } }
-    
+
+    function editDuration(id) {
+        const history = db.getHistory();
+        const idx = history.findIndex(h => h.id === id);
+        const newVal = prompt("Enter duration in minutes:", Math.round(history[idx].duration/60));
+        if (newVal) { history[idx].duration = parseInt(newVal) * 60; db.saveHistory(history); loadHistory(); }
+    }
+
+    function editTime(id) {
+        const history = db.getHistory();
+        const idx = history.findIndex(h => h.id === id);
+        const current = new Date(history[idx].start).toISOString().slice(0,16);
+        const newVal = prompt("Edit date/time (YYYY-MM-DDTHH:MM):", current);
+        if (newVal) { history[idx].start = new Date(newVal).toISOString(); db.saveHistory(history); loadHistory(); }
+    }
+
+    function deleteItem(id) { if(confirm("Delete session?")) { db.saveHistory(db.getHistory().filter(h => h.id !== id)); loadHistory(); } }
+    function copyText(id) { 
+        const history = db.getHistory();
+        const item = history.find(h => h.id == id);
+        navigator.clipboard.writeText(item.pointers).then(() => alert("Copied!")); 
+    }
+
     function backupJSON() {
         const data = { history: db.getHistory(), dailyGoal: db.getGoal(), mainPointers: db.getPointers() };
         const a = document.createElement('a');
@@ -452,10 +482,7 @@
         const r = new FileReader();
         r.onload = ev => {
             const imported = JSON.parse(ev.target.result);
-            if (imported.history) {
-                let merged = [...imported.history, ...db.getHistory()].filter((v,i,a)=>a.findIndex(t=>(t.id === v.id))===i);
-                db.saveHistory(merged);
-            }
+            if (imported.history) db.saveHistory(imported.history);
             if (imported.dailyGoal) db.setGoal(imported.dailyGoal);
             if (imported.mainPointers) db.savePointers(imported.mainPointers);
             location.reload();
@@ -474,4 +501,3 @@
 </script>
 </body>
 </html>
- 
