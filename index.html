@@ -183,16 +183,15 @@
         <h3>User Guide</h3>
         <div style="line-height: 1.7; color: #bbb;">
             <p style="color: var(--text); font-size: 0.95rem; margin-bottom: 25px; opacity: 0.9; line-height: 1.6;">A lightweight tracker for prayer sessions and digital journaling.</p>
-            <h4 style="color:var(--accent); margin-bottom:5px;">📖 Manual Logging</h4>
-            <p>Use the <strong>Log</strong> tab to backdate entries manually.</p>
-            <h4 style="color:var(--accent); margin-bottom:5px;">🎯 Daily Goals</h4>
-            <p>In <strong>History</strong>, tap the dashed Goal value to set your target. Days that meet this goal turn <strong>Green</strong>.</p>
-            <h4 style="color:var(--accent); margin-bottom:5px;">▾ Interactive History</h4>
-            <p>Tap the chevron to expand a day. Tap <strong>Dashed Underlines</strong> to edit times or durations. Edit notes directly by tapping the text.</p>
-            <h4 style="color:var(--accent); margin-bottom:5px;">📲 Data Backup</h4>
-            <p>Use <strong>JSON Backup</strong> to move data. Tap <strong>Restore</strong> to import old logs.</p>
-            <h4 style="color:var(--accent); margin-bottom:5px;">🔒 Privacy</h4>
-            <p>Data stays locally on your device. Auto-saves every 10 seconds during sessions.</p>
+            
+            <h4 style="color:var(--accent); margin-bottom:5px;">🔒 Your Privacy & Data</h4>
+            <p>None of your data from this app—your notes or your timings—ever leaves your phone or computer. There is no central database and no one (including the developer) can see what you write. It stays 100% on your device, just like a paper journal.</p>
+            
+            <h4 style="color:var(--accent); margin-bottom:5px;">🎯 Daily Goals & History</h4>
+            <p>In <strong>History</strong>, tap the dashed Goal value to set a target. Expand any day using the chevron to see individual sessions. Tap any dashed underline to edit times or durations.</p>
+            
+            <h4 style="color:var(--accent); margin-bottom:5px;">📲 Backups</h4>
+            <p>Since data is only on your device, use <strong>JSON Backup</strong> regularly. If you get a new phone or switch browsers, you'll need this file to transfer your history.</p>
         </div>
         <button class="btn secondary full-width" style="margin-top:20px;" onclick="showPage('setup')">Back to App</button>
     </div>
@@ -263,12 +262,19 @@
         if(pageId === 'manual') prepManualLog();
     }
 
-    async function requestWakeLock() { if ('wakeLock' in navigator) { try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {} } }
-    function releaseWakeLock() { if (wakeLock) { wakeLock.release().then(() => wakeLock = null); } }
+    async function requestWakeLock() {
+        if ('wakeLock' in navigator) {
+            try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
+        }
+    }
+
+    document.addEventListener('visibilitychange', async () => {
+        if (wakeLock !== null && document.visibilityState === 'visible') { await requestWakeLock(); }
+    });
 
     function startSession(isResuming = false) {
         if (!isPaused && !isResuming) { startTime = Date.now(); requestWakeLock(); } 
-        else if (isPaused) { startTime = Date.now() - (elapsedSeconds * 1000); }
+        else if (isPaused) { startTime = Date.now() - (elapsedSeconds * 1000); requestWakeLock(); }
         isPaused = false;
         document.getElementById('start-btn').classList.add('hidden');
         ['pause-btn', 'stop-btn'].forEach(id => document.getElementById(id).classList.remove('hidden'));
@@ -283,7 +289,8 @@
         if (!isPaused) {
             clearInterval(timerInterval); clearInterval(autosaveInterval);
             isPaused = true; document.getElementById('pause-btn').innerText = "Resume";
-            document.getElementById('session-status').innerText = "Paused"; releaseWakeLock();
+            document.getElementById('session-status').innerText = "Paused";
+            if (wakeLock) { wakeLock.release().then(() => wakeLock = null); }
         } else {
             document.getElementById('pause-btn').innerText = "Pause"; startSession();
         }
@@ -296,8 +303,11 @@
             history.push({ id: Date.now(), start: new Date(startTime).toISOString(), end: new Date().toISOString(), duration: elapsedSeconds, pointers: mainPointersEl.value });
             db.saveHistory(history);
         }
-        db.clearActiveSession(); releaseWakeLock(); location.reload(); 
+        db.clearActiveSession();
+        if (wakeLock) { wakeLock.release().then(() => wakeLock = null); }
+        location.reload(); 
     }
+
 
     function updateTimerDisplay() {
         const h = Math.floor(elapsedSeconds / 3600).toString().padStart(2, '0');
