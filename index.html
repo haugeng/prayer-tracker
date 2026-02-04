@@ -422,20 +422,31 @@
         const t = document.createElement("div"); 
         t.innerHTML = i.pointers || "";
         const plainText = t.innerText; 
-        navigator.clipboard.writeText(plainText).then(() => alert("Copied text!"));
+        navigator.clipboard.writeText(plainText).then(() => alert("Copied text."));
     }
 
     function exportCSV() {
         const h = db.getHistory(); 
+        // Use a semi-colon or ensure date has no commas to prevent column shifting
         let csv = "Date,Duration(Min),Notes\n";
+        
         h.forEach(i => {
+            const dateObj = new Date(i.start);
+            // Formats to YYYY-MM-DD HH:mm (No commas)
+            const isoDate = dateObj.getFullYear() + "-" + 
+                           String(dateObj.getMonth() + 1).padStart(2, '0') + "-" + 
+                           String(dateObj.getDate()).padStart(2, '0') + " " + 
+                           String(dateObj.getHours()).padStart(2, '0') + ":" + 
+                           String(dateObj.getMinutes()).padStart(2, '0');
+
             const t = document.createElement("div"); 
             t.innerHTML = i.pointers || "";
+            // Strip HTML and escape quotes for the Notes column
             const p = (t.innerText || t.textContent).replace(/"/g, '""');
-            csv += `${new Date(i.start).toLocaleString().replace(/,/g,'')},${Math.round(i.duration/60)},"${p}"\n`;
+            
+            csv += `${isoDate},${Math.round(i.duration/60)},"${p}"\n`;
         });
         
-        // Fix for encoding issues: use explicit Blob with BOM
         const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
         const a = document.createElement('a'); 
         a.href = URL.createObjectURL(blob);
