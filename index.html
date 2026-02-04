@@ -353,15 +353,19 @@
     }
 
     async function copyItem(id) {
-        const i = db.getHistory().find(x => x.id == id);
-        const html = i.pointers || "";
-        const text = i.pointers.replace(/<[^>]+>/g, '');
-        const blobHtml = new Blob([html], { type: "text/html" });
-        const blobText = new Blob([text], { type: "text/plain" });
-        const data = [new ClipboardItem({ "text/html": blobHtml, "text/plain": blobText })];
-        await navigator.clipboard.write(data);
-        alert("Copied with formatting!");
+    const i = db.getHistory().find(x => x.id == id);
+    const htmlContent = i.pointers || "";
+    // Create a version without HTML tags for apps that don't support rich text
+    const plainText = htmlContent.replace(/<[^>]+>/g, ''); 
+
+    const blobHtml = new Blob([htmlContent], { type: "text/html" });
+    const blobText = new Blob([plainText], { type: "text/plain" });
+    const data = [new ClipboardItem({ "text/html": blobHtml, "text/plain": blobText })];
+
+    await navigator.clipboard.write(data);
+    alert("Text copied.");
     }
+    
 
     function exportCSV() {
         const h = db.getHistory(); let csv = "Date,Duration(Min),Notes\n";
