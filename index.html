@@ -52,6 +52,7 @@
         .success { background: var(--success); color: #000; }
         .full-width { width: 100%; margin-top: 10px; }
 
+        /* Dashboard & Grouping */
         .dash-card { background: var(--card); border-radius: 15px; padding: 15px; margin-bottom: 10px; border: 1px solid #333; }
         .dash-main { display: flex; justify-content: space-around; align-items: center; }
         .dash-item { text-align: center; flex: 1; }
@@ -83,7 +84,6 @@
         .recovery-card { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid var(--accent); text-align: center; max-width: 400px; width: 100%; }
         
         .hidden { display: none !important; }
-        .verse-footer { margin-top: 30px; text-align: center; font-size: 0.8rem; color: #555; font-style: italic; }
     </style>
 </head>
 <body>
@@ -132,7 +132,6 @@
                 <button id="stop-btn" class="btn stop hidden" onclick="stopSession()">End</button>
             </div>
         </div>
-        <div class="verse-footer">"Pray without ceasing." — 1 Thess 5:17</div>
     </div>
 
     <div id="manual-page" class="hidden">
@@ -140,8 +139,14 @@
         <div style="background: #1a1a1a; padding: 20px; border-radius: 15px; border: 1px solid #333;">
             <label style="font-size: 0.7rem; color: var(--accent); font-weight: bold;">TIME RANGE</label>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                <input type="datetime-local" id="manual-start">
-                <input type="datetime-local" id="manual-end">
+                <div>
+                    <span style="font-size: 10px; color: #888;">From</span>
+                    <input type="datetime-local" id="manual-start">
+                </div>
+                <div>
+                    <span style="font-size: 10px; color: #888;">To</span>
+                    <input type="datetime-local" id="manual-end">
+                </div>
             </div>
             <div class="toolbar">
                 <button onclick="format('bold')"><b>B</b></button>
@@ -315,13 +320,13 @@
     function saveManualLog() {
         const s = new Date(document.getElementById('manual-start').value), e = new Date(document.getElementById('manual-end').value);
         const diff = Math.floor((e - s) / 1000);
-        if (diff <= 0) return alert("Time error.");
+        if (diff <= 0) return alert("End time must be after Start time.");
         const h = db.getHistory();
         h.push({ id: Date.now(), start: s.toISOString(), duration: diff, pointers: document.getElementById('manual-pointers').innerHTML });
         db.saveHistory(h); showPage('history');
     }
 
-    function formatTime(mins) {
+    function formatTimeLabel(mins) {
         if (mins < 60) return `${Math.round(mins)}m`;
         const h = Math.floor(mins / 60);
         const m = Math.round(mins % 60);
@@ -349,7 +354,7 @@
         Object.values(grouped).forEach(day => {
             if (day.date >= startOfWeek) weeklyMins += day.total;
             const year = day.date.getFullYear(), month = day.date.toLocaleString('default', { month: 'long' });
-            
+
             if (year !== lastYear) { 
                 const y = document.createElement('div'); y.className="year-head"; y.innerText=year; list.appendChild(y); lastYear=year; 
             }
@@ -384,7 +389,7 @@
             list.appendChild(dayEl);
         });
 
-        document.getElementById('dash-week-total').innerText = formatTime(weeklyMins);
+        document.getElementById('dash-week-total').innerText = formatTimeLabel(weeklyMins);
         document.getElementById('dash-goal-val').innerText = goal + "m";
         document.getElementById('dash-streak').innerText = getStreak(history);
     }
