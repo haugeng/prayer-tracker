@@ -3,87 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Prayer Tracker Pro</title>
+    <title>My Prayer Tracker</title>
     <style>
         :root {
             --bg: #121212; --card: #1e1e1e; --text: #e0e0e0;
-            --accent: #bb86fc; --success: #03dac6; --error: #cf6679; --border: #333;
+            --accent: #bb86fc; --success: #03dac6; --error: #cf6679;
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, system-ui, sans-serif;
             background-color: var(--bg); color: var(--text);
-            margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; line-height: 1.5;
+            margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center;
         }
-        .container { width: 100%; max-width: 500px; padding-bottom: 60px; }
+        .container { width: 100%; max-width: 500px; padding-bottom: 50px; }
         
-        /* Header & Nav */
-        .header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .help-icon { 
-            background: #333; color: var(--text); width: 36px; height: 36px; 
+            background: #333; color: var(--text); width: 32px; height: 32px; 
             border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            font-weight: bold; cursor: pointer; border: 1px solid #444;
+            font-weight: bold; cursor: pointer; border: 1px solid #444; font-size: 18px;
         }
-        .nav { display: flex; width: 100%; gap: 8px; margin-bottom: 20px; position: sticky; top: 0; background: var(--bg); z-index: 10; padding: 10px 0; }
-        .nav button { flex: 1; padding: 12px 5px; font-size: 14px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; background: #2a2a2a; color: white; transition: 0.2s; }
+        .nav { display: flex; width: 100%; gap: 8px; margin-bottom: 20px; position: sticky; top: 0; background: var(--bg); z-index: 10; padding: 5px 0; }
+        .nav button { flex: 1; padding: 12px 5px; font-size: 14px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; background: #2a2a2a; color: white; }
         .nav .active { background: var(--accent); color: #000; }
 
-        /* Rich Text & Inputs */
+        /* Rich Text Toolbars */
         .toolbar { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
-        .toolbar button { background: #2a2a2a; color: var(--text); border: 1px solid #444; padding: 6px 10px; border-radius: 8px; font-size: 13px; cursor: pointer; min-width: 38px; }
+        .toolbar button { background: #2a2a2a; color: var(--text); border: 1px solid #444; padding: 6px 10px; border-radius: 8px; font-size: 13px; cursor: pointer; min-width: 35px; }
         .toolbar button:active { background: var(--accent); color: #000; }
 
         [contenteditable="true"], input {
             width: 100%; background: var(--card); color: var(--text);
             border: 1px solid #444; border-radius: 12px; padding: 14px;
-            font-size: 16px; margin-bottom: 12px; outline: none;
+            box-sizing: border-box; font-size: 16px; margin-bottom: 12px;
         }
-        [contenteditable="true"] { height: 260px; overflow-y: auto; white-space: pre-wrap; transition: border 0.2s; }
-        [contenteditable="true"]:focus { border-color: var(--accent); }
-        [contenteditable="true"]:empty:before { content: attr(placeholder); color: #666; pointer-events: none; }
-        #manual-pointers { height: 160px; }
+        #main-pointers, #manual-pointers { height: 264px; overflow-y: auto; text-align: left; line-height: 1.5; white-space: pre-wrap; outline: none; }
+        #manual-pointers { height: 180px; }
+        [contenteditable="true"]:empty:before { content: attr(placeholder); color: #666; pointer-events: none; display: block; }
 
-        /* Timer UI */
         .timer-box {
-            background: linear-gradient(145deg, #1e1e1e, #252525);
-            padding: 35px 20px; border-radius: 24px; text-align: center;
-            margin: 20px 0; border: 1px solid var(--border);
+            background: linear-gradient(145deg, #1e1e1e, #222);
+            padding: 30px 20px; border-radius: 20px; text-align: center;
+            margin: 15px 0; border: 1px solid #333;
         }
-        #display-time { font-size: 3.8rem; font-weight: 800; font-family: ui-monospace, monospace; color: var(--accent); letter-spacing: -2px; }
-        .btn { border: none; font-weight: bold; cursor: pointer; padding: 16px; border-radius: 14px; transition: opacity 0.2s; }
-        .btn:active { opacity: 0.8; }
+        #display-time { font-size: 3.5rem; font-weight: bold; font-family: monospace; color: var(--accent); }
+        .btn { border: none; font-weight: bold; cursor: pointer; padding: 15px; border-radius: 12px; }
         .primary { background: var(--accent); color: #000; }
         .stop { background: var(--error); color: white; }
         .success { background: var(--success); color: #000; }
         .full-width { width: 100%; margin-top: 10px; }
 
-        /* Dashboard & History */
-        .dash-card { background: var(--card); border-radius: 18px; padding: 20px; margin-bottom: 15px; border: 1px solid var(--border); display: flex; justify-content: space-around; }
-        .dash-item { text-align: center; }
-        .dash-val { display: block; font-size: 1.5rem; font-weight: bold; color: var(--accent); }
-        .dash-lbl { font-size: 0.7rem; color: #888; text-transform: uppercase; margin-top: 4px; display: block; }
+        .dash-card { background: var(--card); border-radius: 15px; padding: 15px; margin-bottom: 10px; border: 1px solid #333; }
+        .dash-main { display: flex; justify-content: space-around; align-items: center; }
+        .dash-item { text-align: center; flex: 1; }
+        .dash-val { display: block; font-size: 1.2rem; font-weight: bold; color: var(--accent); }
+        .dash-lbl { font-size: 0.65rem; color: #888; text-transform: uppercase; margin-top: 4px; display: block; }
 
+        .year-head { font-size: 1.3rem; font-weight: bold; color: var(--accent); margin: 25px 0 5px 0; }
+        .month-head { font-size: 0.85rem; color: #888; text-transform: uppercase; margin: 10px 0 5px 0; border-bottom: 1px solid #222; padding-bottom: 4px; }
+        
         .history-day-group { border-bottom: 1px solid #222; }
-        .day-summary { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; cursor: pointer; }
-        .chevron { display: inline-block; margin-right: 10px; transition: 0.2s; color: var(--accent); font-size: 0.8rem; }
+        .day-summary { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; cursor: pointer; }
+        .chevron { display: inline-block; margin-right: 10px; transition: transform 0.2s ease; color: var(--accent); font-size: 0.8rem; }
         .expanded .chevron { transform: rotate(90deg); }
         
-        .sessions-container { max-height: 0; overflow: hidden; transition: all 0.3s ease-out; background: #161616; border-radius: 12px; }
-        .sessions-container.expanded { max-height: 3000px; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); }
-        .session-item { border-bottom: 1px solid #282828; padding: 15px 0; }
+        .sessions-container { max-height: 0; overflow: hidden; transition: all 0.3s ease; background: #161616; border-radius: 10px; }
+        .sessions-container.expanded { max-height: 2000px; padding: 10px; margin-bottom: 15px; border: 1px solid #333; }
+        .session-item { border-bottom: 1px solid #222; padding: 12px 0; }
         .session-item:last-child { border-bottom: none; }
-        .editable-text { color: #ccc; font-style: italic; font-size: 14px; margin-top: 8px; display: block; }
-
-        /* Utility */
-        .admin-toggle { background: transparent; color: #888; border: 1px solid var(--border); border-radius: 10px; padding: 10px; font-size: 0.8rem; width: 100%; cursor: pointer; margin-bottom: 15px; }
-        #admin-tools { display: none; flex-direction: column; gap: 10px; padding-bottom: 15px; border-bottom: 1px solid var(--border); margin-bottom: 15px; }
-        #admin-tools.open { display: flex; }
+        .editable-text { white-space: pre-wrap; color: #ccc; outline: none; font-style: italic; line-height: 1.6; font-size: 14px; width: 100%; display: block; }
         
-        #recovery-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .recovery-card { background: var(--card); padding: 30px; border-radius: 24px; border: 1px solid var(--accent); text-align: center; width: 100%; max-width: 400px; }
+        .action-bar { display: flex; gap: 10px; margin-top: 10px; }
+        .action-btn { background: #333; color: #eee; font-size: 11px; padding: 6px 10px; border-radius: 4px; border: none; cursor: pointer; }
+
+        .admin-toggle { background: transparent; color: #888; border: 1px solid #333; border-radius: 8px; padding: 8px; font-size: 0.75rem; width: 100%; cursor: pointer; margin-bottom: 10px; }
+        #admin-tools { display: none; flex-direction: column; gap: 8px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #333; }
+        #admin-tools.open { display: flex; }
+
+        #recovery-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .recovery-card { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid var(--accent); text-align: center; max-width: 400px; width: 100%; }
         
         .hidden { display: none !important; }
-        .verse-footer { margin-top: 40px; text-align: center; font-size: 0.85rem; color: #555; font-style: italic; }
+        .verse-footer { margin-top: 30px; text-align: center; font-size: 0.8rem; color: #555; font-style: italic; }
     </style>
 </head>
 <body>
@@ -91,46 +91,45 @@
 <div id="recovery-overlay" class="hidden">
     <div class="recovery-card">
         <h2 style="color: var(--accent); margin-top: 0;">Unfinished Session</h2>
-        <p id="recovery-timestamp" style="font-size: 0.9rem; color: #888;">Started: --:--</p>
-        <div id="recovery-details" style="font-family: monospace; color: var(--success); margin: 20px 0; font-size: 2rem; font-weight: bold;">00:00:00</div>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-            <button class="btn primary" onclick="app.handleRecovery('resume')">Resume Session</button>
-            <button class="btn success" onclick="app.handleRecovery('save')">Save & Finish</button>
-            <button class="btn secondary" style="background: #311;" onclick="app.handleRecovery('discard')">Discard</button>
+        <p id="recovery-timestamp" style="font-size: 0.85rem; color: #888;">Started: --:--</p>
+        <div id="recovery-details" style="font-family: monospace; color: var(--success); margin: 15px 0; font-size: 1.5rem;">00:00:00</div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button class="btn primary" onclick="handleRecovery('resume')">Resume Session</button>
+            <button class="btn success" onclick="handleRecovery('save')">Save & Finish</button>
+            <button class="btn secondary" style="background: #422;" onclick="handleRecovery('discard')">Discard</button>
         </div>
     </div>
 </div>
 
 <div class="container">
     <div class="header">
-        <h2 style="margin: 0; font-size: 1.4rem; letter-spacing: -0.5px;">Prayer Tracker</h2>
-        <div class="help-icon" onclick="app.showPage('about')">?</div>
+        <h2 style="margin: 0; font-size: 1.3rem;">My Prayer Tracker</h2>
+        <div class="help-icon" onclick="showPage('about')">?</div>
     </div>
 
     <div class="nav">
-        <button id="nav-setup" class="active" onclick="app.showPage('setup')">Timer</button>
-        <button id="nav-manual" onclick="app.showPage('manual')">Log</button>
-        <button id="nav-history" onclick="app.showPage('history')">History</button>
+        <button id="nav-setup" class="active" onclick="showPage('setup')">Timer</button>
+        <button id="nav-manual" onclick="showPage('manual')">Log</button>
+        <button id="nav-history" onclick="showPage('history')">History</button>
     </div>
 
     <div id="setup-page">
         <div class="toolbar">
-            <button onclick="app.format('bold')"><b>B</b></button>
-            <button onclick="app.format('italic')"><i>I</i></button>
-            <button onclick="app.format('underline')"><u>U</u></button>
-            <button onclick="app.format('strikeThrough')"><s>S</s></button>
-            <button onclick="app.format('insertUnorderedList')">• List</button>
-            <button onclick="app.format('removeFormat')">Clear</button>
+            <button onclick="format('bold')"><b>B</b></button>
+            <button onclick="format('italic')"><i>I</i></button>
+            <button onclick="format('underline')"><u>U</u></button>
+            <button onclick="format('strikeThrough')"><s>S</s></button>
+            <button onclick="format('insertUnorderedList')">• List</button>
+            <button onclick="format('removeFormat')">Clear</button>
         </div>
-        <div id="main-pointers" contenteditable="true" placeholder="What's on your heart today?" spellcheck="true"></div>
-        
+        <div id="main-pointers" contenteditable="true" placeholder="Enter reflections here..."></div>
         <div class="timer-box">
             <div id="display-time">00:00:00</div>
-            <p id="session-status" style="color: #666; margin: 12px 0; font-weight: 500;">Ready to begin</p>
-            <div style="display: flex; justify-content: center; gap: 12px;">
-                <button id="start-btn" class="btn primary" style="padding-inline: 40px;" onclick="app.startTimer()">Start</button>
-                <button id="pause-btn" class="btn secondary hidden" onclick="app.togglePause()">Pause</button>
-                <button id="stop-btn" class="btn stop hidden" onclick="app.stopTimer()">Finish</button>
+            <p id="session-status" style="color: #666; margin: 10px 0; font-size: 0.9rem;">Ready</p>
+            <div style="display: flex; justify-content: center; gap: 10px;">
+                <button id="start-btn" class="btn primary" onclick="startSession()">Start Prayer</button>
+                <button id="pause-btn" class="btn secondary hidden" onclick="togglePause()">Pause</button>
+                <button id="stop-btn" class="btn stop hidden" onclick="stopSession()">End</button>
             </div>
         </div>
         <div class="verse-footer">"Pray without ceasing." — 1 Thess 5:17</div>
@@ -138,44 +137,49 @@
 
     <div id="manual-page" class="hidden">
         <h3>Manual Entry</h3>
-        <div style="background: #1a1a1a; padding: 20px; border-radius: 18px; border: 1px solid var(--border);">
-            <label style="font-size: 0.75rem; color: var(--accent); font-weight: bold; display: block; margin-bottom: 5px;">TIME RANGE</label>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                <input type="datetime-local" id="manual-start" style="margin-bottom:0; font-size: 13px;">
-                <input type="datetime-local" id="manual-end" style="margin-bottom:0; font-size: 13px;">
+        <div style="background: #1a1a1a; padding: 20px; border-radius: 15px; border: 1px solid #333;">
+            <label style="font-size: 0.7rem; color: var(--accent); font-weight: bold;">TIME RANGE</label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <input type="datetime-local" id="manual-start">
+                <input type="datetime-local" id="manual-end">
             </div>
             <div class="toolbar">
-                <button onclick="app.format('bold')"><b>B</b></button>
-                <button onclick="app.format('italic')"><i>I</i></button>
-                <button onclick="app.format('insertUnorderedList')">• List</button>
+                <button onclick="format('bold')"><b>B</b></button>
+                <button onclick="format('italic')"><i>I</i></button>
+                <button onclick="format('underline')"><u>U</u></button>
+                <button onclick="format('strikeThrough')"><s>S</s></button>
+                <button onclick="format('insertUnorderedList')">• List</button>
+                <button onclick="format('removeFormat')">Clear</button>
             </div>
-            <div id="manual-pointers" contenteditable="true" placeholder="Add notes for this entry..." spellcheck="true"></div>
-            <button class="btn success full-width" onclick="app.saveManual()">Save to History</button>
+            <div id="manual-pointers" contenteditable="true" placeholder="Add notes for this entry..."></div>
+            <button class="btn success full-width" onclick="saveManualLog()">Add to History</button>
         </div>
     </div>
 
     <div id="history-page" class="hidden">
         <div class="dash-card">
-            <div class="dash-item">
-                <span id="dash-week-total" class="dash-val">0m</span>
-                <span class="dash-lbl">This Week</span>
-            </div>
-            <div class="dash-item" style="cursor: pointer;" onclick="app.setGoal()">
-                <span id="dash-goal-val" class="dash-val" style="text-decoration: underline dashed;">0m</span>
-                <span class="dash-lbl">Daily Goal 🎯</span>
-            </div>
-            <div class="dash-item">
-                <span id="dash-streak" class="dash-val">0</span>
-                <span class="dash-lbl">Streak 🔥</span>
+            <div class="dash-main">
+                <div class="dash-item">
+                    <span id="dash-week-total" class="dash-val">0m</span>
+                    <span class="dash-lbl">This Week</span>
+                </div>
+                <div class="dash-item" onclick="setDailyGoal()">
+                    <span id="dash-goal-val" class="dash-val" style="text-decoration: underline dashed;">0m</span>
+                    <span class="dash-lbl">Daily Goal 🎯</span>
+                </div>
+                <div class="dash-item">
+                    <span id="dash-streak" class="dash-val">0</span>
+                    <span class="dash-lbl">Streak 🔥</span>
+                </div>
             </div>
         </div>
 
-        <button class="admin-toggle" onclick="app.toggleAdmin()">⚙️ Data & Backups</button>
+        <button class="admin-toggle" onclick="document.getElementById('admin-tools').classList.toggle('open')">⚙️ Data & Backups</button>
         <div id="admin-tools">
-            <button class="btn secondary" style="font-size: 13px;" onclick="app.exportCSV()">📊 Export CSV (Plain Text)</button>
-            <button class="btn secondary" style="font-size: 13px;" onclick="app.backupJSON()">💾 Download Backup (Full Data)</button>
-            <button class="btn secondary" style="font-size: 13px;" onclick="document.getElementById('importFile').click()">📂 Restore Backup</button>
-            <input type="file" id="importFile" class="hidden" accept=".json" onchange="app.restoreJSON(event)">
+            <button class="btn secondary" style="font-size: 12px;" onclick="exportCSV()">📊 Export to CSV (Clean)</button>
+            <button class="btn secondary" style="font-size: 12px;" onclick="backupJSON()">💾 Download JSON Backup</button>
+            <button class="btn secondary" style="font-size: 12px;" onclick="document.getElementById('importFile').click()">📂 Restore Backup</button>
+            <input type="file" id="importFile" class="hidden" accept=".json" onchange="restoreJSON(event)">
         </div>
 
         <div id="history-list"></div>
@@ -184,253 +188,195 @@
     <div id="about-page" class="hidden">
         <h3>User Guide</h3>
         <div style="line-height: 1.7; color: #bbb;">
-            <p style="color: var(--text);">A lightweight, private tracker for your spiritual journey.</p>
+            <p style="color: var(--text); font-size: 0.95rem; margin-bottom: 25px; opacity: 0.9; line-height: 1.6;">A lightweight tracker for prayer sessions and digital journaling.</p>
             
-            <h4 style="color:var(--accent); margin-bottom:5px;">🔒 Your Privacy & Data</h4>
+            <h4 style="color:var(--accent); margin-bottom:5px;">🔒 Your Privacy</h4>
             <p>None of your data from this app—your notes or your timings—ever leaves your phone or computer. There is no central database and no one (including the developer) can see what you write. It stays 100% on your device, just like a paper journal.</p>
             
-            <h4 style="color:var(--accent); margin-bottom:5px;">✍️ Formatting</h4>
-            <p>Use the toolbar to add <b>bold</b>, <i>italics</i>, or lists. On mobile, you can also long-press text to use your phone's native formatting menu.</p>
+            <h4 style="color:var(--accent); margin-bottom:5px;">📲 Data</h4>
+            <p>As all data is only stored on your device, use JSON Backup regularly. If you get a new phone or switch browsers, you'll need this file to transfer your history.</p>
         </div>
-        <button class="btn primary full-width" style="margin-top:20px;" onclick="app.showPage('setup')">Got it</button>
+        <button class="btn secondary full-width" style="margin-top:20px;" onclick="showPage('setup')">Back to App</button>
     </div>
 </div>
 
 <script>
-/**
- * Prayer Tracker v3.0 - Optimized Script
- */
-const app = {
-    state: {
-        timerInterval: null,
-        autoSave: null,
-        elapsed: 0,
-        startTime: null,
-        isPaused: false,
-        wakeLock: null,
-        openDay: null
-    },
+    const db = {
+        getHistory: () => JSON.parse(localStorage.getItem('prayerHistory') || "[]"),
+        saveHistory: (data) => localStorage.setItem('prayerHistory', JSON.stringify(data)),
+        getPointers: () => localStorage.getItem('mainPointers') || "",
+        savePointers: (txt) => localStorage.setItem('mainPointers', txt),
+        getGoal: () => parseInt(localStorage.getItem('dailyGoal') || "0"),
+        setGoal: (val) => localStorage.setItem('dailyGoal', val)
+    };
 
-    // --- DATA HANDLING ---
-    db: {
-        get: (key, fallback = "[]") => JSON.parse(localStorage.getItem(key) || fallback),
-        set: (key, val) => localStorage.setItem(key, JSON.stringify(val)),
-        savePointers: (html) => localStorage.setItem('pointers', html),
-        getPointers: () => localStorage.getItem('pointers') || ""
-    },
+    let timerInterval, autosaveInterval, elapsedSeconds = 0, isPaused = false, startTime = null, wakeLock = null, openDay = null;
 
-    init() {
-        // Load Pointers
-        document.getElementById('main-pointers').innerHTML = this.db.getPointers();
-        document.getElementById('main-pointers').addEventListener('input', e => this.db.savePointers(e.target.innerHTML));
+    const mainPointersEl = document.getElementById('main-pointers');
+    mainPointersEl.innerHTML = db.getPointers();
+    mainPointersEl.addEventListener('input', () => db.savePointers(mainPointersEl.innerHTML));
 
-        // Visibility Listener for Wake Lock
-        document.addEventListener('visibilitychange', () => this.handleVisibility());
+    async function requestWakeLock() {
+        if ('wakeLock' in navigator) {
+            try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
+        }
+    }
+    document.addEventListener('visibilitychange', async () => {
+        if (wakeLock !== null && document.visibilityState === 'visible') await requestWakeLock();
+    });
 
-        // Check for unfinished sessions
-        const active = this.db.get('activeSession', 'null');
-        if (active && active.startTime) {
-            const start = new Date(active.startTime);
-            document.getElementById('recovery-timestamp').innerText = `Started: ${start.toLocaleDateString()} ${start.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
+    window.onload = () => {
+        const saved = JSON.parse(localStorage.getItem('activeSession'));
+        if (saved && saved.startTime) {
+            const start = new Date(saved.startTime);
+            document.getElementById('recovery-timestamp').innerText = `Started: ${start.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
             document.getElementById('recovery-overlay').classList.remove('hidden');
         }
-    },
+    };
 
-    // --- PAGE NAVIGATION ---
-    showPage(id) {
+    function showPage(id) {
         ['setup', 'manual', 'history', 'about'].forEach(p => {
             document.getElementById(p + '-page').classList.add('hidden');
-            const btn = document.getElementById('nav-' + p);
-            if (btn) btn.classList.remove('active');
+            document.getElementById('nav-' + p)?.classList.remove('active');
         });
         document.getElementById(id + '-page').classList.remove('hidden');
-        if (document.getElementById('nav-' + id)) document.getElementById('nav-' + id).classList.add('active');
-        
-        if (id === 'history') this.renderHistory();
-        if (id === 'manual') this.prepManual();
-    },
+        document.getElementById('nav-' + id)?.classList.add('active');
+        if (id === 'history') loadHistory();
+        if (id === 'manual') prepManual();
+    }
 
-    // --- FORMATTING ---
-    format(cmd) {
+    function format(cmd) {
         document.execCommand(cmd, false, null);
         const active = document.activeElement;
         if (active && active.getAttribute('contenteditable')) active.focus();
-    },
+    }
 
-    strip(html) {
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-        return doc.body.textContent || doc.body.innerText || "";
-    },
-
-    // --- TIMER LOGIC ---
-    async requestLock() {
-        if ('wakeLock' in navigator) {
-            try { this.state.wakeLock = await navigator.wakeLock.request('screen'); } catch {}
-        }
-    },
-
-    async handleVisibility() {
-        if (this.state.wakeLock && document.visibilityState === 'visible') await this.requestLock();
-    },
-
-    startTimer(resuming = false) {
-        if (!this.state.isPaused && !resuming) {
-            this.state.startTime = Date.now();
-            this.requestLock();
-        } else if (this.state.isPaused) {
-            this.state.startTime = Date.now() - (this.state.elapsed * 1000);
-            this.requestLock();
-        }
-        
-        this.state.isPaused = false;
+    function startSession(isResuming = false) {
+        if (!isPaused && !isResuming) { startTime = Date.now(); requestWakeLock(); } 
+        else if (isPaused) { startTime = Date.now() - (elapsedSeconds * 1000); requestWakeLock(); }
+        isPaused = false;
         document.getElementById('start-btn').classList.add('hidden');
         ['pause-btn', 'stop-btn'].forEach(i => document.getElementById(i).classList.remove('hidden'));
         document.getElementById('session-status').innerText = "Session Active";
-
-        clearInterval(this.state.timerInterval);
-        this.state.timerInterval = setInterval(() => {
-            this.state.elapsed = Math.floor((Date.now() - this.state.startTime) / 1000);
-            this.updateDisplay();
-        }, 1000);
-
-        clearInterval(this.state.autoSave);
-        this.state.autoSave = setInterval(() => {
-            this.db.set('activeSession', { 
-                startTime: this.state.startTime, 
-                elapsed: this.state.elapsed, 
-                pointers: document.getElementById('main-pointers').innerHTML 
-            });
+        timerInterval = setInterval(() => { elapsedSeconds = Math.floor((Date.now() - startTime) / 1000); updateDisplay(); }, 1000);
+        autosaveInterval = setInterval(() => {
+            localStorage.setItem('activeSession', JSON.stringify({ startTime, elapsed: elapsedSeconds, pointers: mainPointersEl.innerHTML }));
         }, 10000);
-    },
+    }
 
-    togglePause() {
-        if (!this.state.isPaused) {
-            clearInterval(this.state.timerInterval);
-            clearInterval(this.state.autoSave);
-            this.state.isPaused = true;
-            document.getElementById('pause-btn').innerText = "Resume";
-            document.getElementById('session-status').innerText = "Paused";
-            if (this.state.wakeLock) { this.state.wakeLock.release().then(() => this.state.wakeLock = null); }
+    function togglePause() {
+        if (!isPaused) {
+            clearInterval(timerInterval); clearInterval(autosaveInterval);
+            isPaused = true; document.getElementById('pause-btn').innerText = "Resume";
+            if (wakeLock) { wakeLock.release().then(() => wakeLock = null); }
         } else {
-            document.getElementById('pause-btn').innerText = "Pause";
-            this.startTimer();
+            document.getElementById('pause-btn').innerText = "Pause"; startSession();
         }
-    },
+    }
 
-    stopTimer() {
-        if (this.state.startTime) {
-            const history = this.db.get('prayerHistory');
-            history.push({
-                id: Date.now(),
-                start: new Date(this.state.startTime).toISOString(),
-                duration: this.state.elapsed,
-                pointers: document.getElementById('main-pointers').innerHTML
-            });
-            this.db.set('prayerHistory', history);
+    function stopSession() {
+        clearInterval(timerInterval); clearInterval(autosaveInterval);
+        if (startTime) {
+            const h = db.getHistory();
+            h.push({ id: Date.now(), start: new Date(startTime).toISOString(), duration: elapsedSeconds, pointers: mainPointersEl.innerHTML });
+            db.saveHistory(h);
         }
-        this.cleanup();
-    },
-
-    updateDisplay() {
-        const h = Math.floor(this.state.elapsed / 3600).toString().padStart(2, '0');
-        const m = Math.floor((this.state.elapsed % 3600) / 60).toString().padStart(2, '0');
-        const s = (this.state.elapsed % 60).toString().padStart(2, '0');
-        document.getElementById('display-time').innerText = `${h}:${m}:${s}`;
-    },
-
-    cleanup() {
-        clearInterval(this.state.timerInterval);
-        clearInterval(this.state.autoSave);
         localStorage.removeItem('activeSession');
-        if (this.state.wakeLock) { this.state.wakeLock.release().then(() => this.state.wakeLock = null); }
         location.reload();
-    },
+    }
 
-    // --- RECOVERY ---
-    handleRecovery(choice) {
-        const saved = this.db.get('activeSession', 'null');
+    function updateDisplay() {
+        const h = Math.floor(elapsedSeconds/3600).toString().padStart(2,'0');
+        const m = Math.floor((elapsedSeconds%3600)/60).toString().padStart(2,'0');
+        const s = (elapsedSeconds%60).toString().padStart(2,'0');
+        document.getElementById('display-time').innerText = `${h}:${m}:${s}`;
+    }
+
+    function handleRecovery(choice) {
+        const saved = JSON.parse(localStorage.getItem('activeSession'));
         document.getElementById('recovery-overlay').classList.add('hidden');
-        if (!saved) return;
-
         if (choice === 'resume') {
-            this.state.startTime = saved.startTime;
-            this.state.elapsed = Math.floor((Date.now() - this.state.startTime) / 1000);
-            document.getElementById('main-pointers').innerHTML = saved.pointers;
-            this.startTimer(true);
+            startTime = saved.startTime; elapsedSeconds = Math.floor((Date.now() - startTime)/1000);
+            mainPointersEl.innerHTML = saved.pointers; startSession(true);
         } else if (choice === 'save') {
-            const history = this.db.get('prayerHistory');
-            history.push({ id: Date.now(), start: new Date(saved.startTime).toISOString(), duration: saved.elapsed, pointers: saved.pointers });
-            this.db.set('prayerHistory', history);
-            this.cleanup();
-        } else {
-            this.cleanup();
-        }
-    },
+            const h = db.getHistory();
+            h.push({ id: Date.now(), start: new Date(saved.startTime).toISOString(), duration: saved.elapsed, pointers: saved.pointers });
+            db.saveHistory(h); localStorage.removeItem('activeSession'); location.reload();
+        } else { localStorage.removeItem('activeSession'); location.reload(); }
+    }
 
-    // --- MANUAL ENTRY ---
-    prepManual() {
-        const now = new Date();
-        const fmt = d => new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+    function prepManual() {
+        const now = new Date(); const fmt = d => new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
         document.getElementById('manual-start').value = fmt(new Date(now - 1800000));
         document.getElementById('manual-end').value = fmt(now);
-        document.getElementById('manual-pointers').innerHTML = document.getElementById('main-pointers').innerHTML;
-    },
+        document.getElementById('manual-pointers').innerHTML = mainPointersEl.innerHTML;
+    }
 
-    saveManual() {
-        const s = new Date(document.getElementById('manual-start').value);
-        const e = new Date(document.getElementById('manual-end').value);
-        const dur = Math.floor((e - s) / 1000);
-        if (dur <= 0) return alert("Invalid duration.");
-        
-        const history = this.db.get('prayerHistory');
-        history.push({ id: Date.now(), start: s.toISOString(), duration: dur, pointers: document.getElementById('manual-pointers').innerHTML });
-        this.db.set('prayerHistory', history);
-        this.showPage('history');
-    },
+    function saveManualLog() {
+        const s = new Date(document.getElementById('manual-start').value), e = new Date(document.getElementById('manual-end').value);
+        const diff = Math.floor((e - s) / 1000);
+        if (diff <= 0) return alert("Time error.");
+        const h = db.getHistory();
+        h.push({ id: Date.now(), start: s.toISOString(), duration: diff, pointers: document.getElementById('manual-pointers').innerHTML });
+        db.saveHistory(h); showPage('history');
+    }
 
-    // --- HISTORY RENDERING ---
-    renderHistory() {
-        const history = this.db.get('prayerHistory').sort((a,b) => new Date(b.start) - new Date(a.start));
-        const goal = this.db.get('dailyGoal', '0');
+    function formatTime(mins) {
+        if (mins < 60) return `${Math.round(mins)}m`;
+        const h = Math.floor(mins / 60);
+        const m = Math.round(mins % 60);
+        return `${h}h ${m}m`;
+    }
+
+    function loadHistory() {
+        const history = db.getHistory().sort((a,b) => new Date(b.start) - new Date(a.start));
         const list = document.getElementById('history-list');
-        list.innerHTML = "";
+        const goal = db.getGoal(); list.innerHTML = "";
+        let weeklyMins = 0, lastYear = null, lastMonth = null;
         
-        let weeklyMins = 0;
         const now = new Date();
-        const startOfWeek = new Date(now.setDate(now.getDate() - (now.getDay() || 7) + 1)).setHours(0,0,0,0);
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
+        startOfWeek.setHours(0,0,0,0);
 
         const grouped = history.reduce((acc, item) => {
-            const d = new Date(item.start).toDateString();
-            if (!acc[d]) acc[d] = { items: [], total: 0, date: new Date(item.start) };
-            acc[d].items.push(item);
-            acc[d].total += item.duration / 60;
+            const dayKey = new Date(item.start).toDateString();
+            if (!acc[dayKey]) acc[dayKey] = { items: [], total: 0, date: new Date(item.start) };
+            acc[dayKey].items.push(item); acc[dayKey].total += (item.duration / 60);
             return acc;
         }, {});
 
         Object.values(grouped).forEach(day => {
             if (day.date >= startOfWeek) weeklyMins += day.total;
+            const year = day.date.getFullYear(), month = day.date.toLocaleString('default', { month: 'long' });
+            
+            if (year !== lastYear) { 
+                const y = document.createElement('div'); y.className="year-head"; y.innerText=year; list.appendChild(y); lastYear=year; 
+            }
+            if (month !== lastMonth || year !== lastYear) { 
+                const m = document.createElement('div'); m.className="month-head"; m.innerText=month; list.appendChild(m); lastMonth=month; 
+            }
+            
             const dayId = day.date.getTime();
-            const isTarget = goal > 0 && day.total >= goal;
-
-            const dayEl = document.createElement('div');
-            dayEl.className = "history-day-group";
-            dayEl.id = `g-${dayId}`;
+            const colorClass = (goal > 0 && day.total >= goal) ? 'var(--success)' : 'var(--accent)';
+            
+            const dayEl = document.createElement('div'); dayEl.className = "history-day-group";
             dayEl.innerHTML = `
-                <div class="day-summary" onclick="app.toggleDay('${dayId}')">
-                    <div><span class="chevron">▸</span><strong>${day.date.toLocaleDateString([], {day:'numeric', month:'short'})}</strong></div>
-                    <span style="font-weight:bold; color:${isTarget ? 'var(--success)' : 'var(--accent)'}">${Math.round(day.total)}m</span>
+                <div class="day-summary" onclick="toggleDay('${dayId}')">
+                    <div><span class="chevron">▸</span><span style="font-size:0.95rem">${day.date.toLocaleDateString([], {day:'numeric', month:'short'})}</span></div>
+                    <span style="font-weight:bold; color:${colorClass};">${Math.round(day.total)}m</span>
                 </div>
-                <div id="d-${dayId}" class="sessions-container ${this.state.openDay == dayId ? 'expanded' : ''}">
-                    ${day.items.map(item => `
+                <div id="day-${dayId}" class="sessions-container ${openDay == dayId ? 'expanded' : ''}">
+                    ${day.items.map(i => `
                         <div class="session-item">
-                            <div style="display:flex; justify-content:space-between; font-size:11px; color:#888;">
-                                <span onclick="app.editTime(${item.id})">${new Date(item.start).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
-                                <span onclick="app.editDur(${item.id})">${Math.round(item.duration/60)} mins</span>
+                            <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#888; margin-bottom:5px;">
+                                <span>${new Date(i.start).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                                <span onclick="editDur(${i.id})" style="text-decoration:underline dashed">${Math.round(i.duration/60)}m</span>
                             </div>
-                            <div class="editable-text" contenteditable="true" onblur="app.updateItemNotes(${item.id}, this)">${item.pointers || "No notes"}</div>
-                            <div style="margin-top:10px; display:flex; gap:8px;">
-                                <button class="admin-toggle" style="width:auto; margin:0;" onclick="app.copyItem(${item.id})">Copy</button>
-                                <button class="admin-toggle" style="width:auto; margin:0; color:#cf6679" onclick="app.deleteItem(${item.id})">Delete</button>
+                            <span class="editable-text" contenteditable="true" onblur="updateNotes(${i.id}, this)">${i.pointers || "Tap to add notes..."}</span>
+                            <div class="action-bar">
+                                <button class="action-btn" onclick="copyItem(${i.id})">📋 Copy</button>
+                                <button class="action-btn" style="background:#422;" onclick="deleteItem(${i.id})">🗑️ Delete</button>
                             </div>
                         </div>
                     `).join('')}
@@ -438,95 +384,56 @@ const app = {
             list.appendChild(dayEl);
         });
 
-        document.getElementById('dash-streak').innerText = this.getStreak(history);
+        document.getElementById('dash-week-total').innerText = formatTime(weeklyMins);
         document.getElementById('dash-goal-val').innerText = goal + "m";
-        document.getElementById('dash-week-total').innerText = Math.round(weeklyMins) + "m";
-    },
+        document.getElementById('dash-streak').innerText = getStreak(history);
+    }
 
-    toggleDay(id) {
-        this.state.openDay = (this.state.openDay == id) ? null : id;
-        this.renderHistory();
-    },
+    function toggleDay(id) { openDay = (openDay == id) ? null : id; loadHistory(); }
+    function updateNotes(id, el) { const h = db.getHistory(); const idx = h.findIndex(i => i.id === id); h[idx].pointers = el.innerHTML; db.saveHistory(h); }
+    function deleteItem(id) { if(confirm("Delete?")) { db.saveHistory(db.getHistory().filter(i => i.id !== id)); loadHistory(); } }
+    function editDur(id) { const h = db.getHistory(); const idx = h.findIndex(i => i.id === id); const val = prompt("Minutes:", Math.round(h[idx].duration/60)); if(val) { h[idx].duration = parseInt(val)*60; db.saveHistory(h); loadHistory(); } }
+    function setDailyGoal() { const val = prompt("Goal (mins):", db.getGoal()); if(val !== null) { db.setGoal(parseInt(val)); loadHistory(); } }
 
-    getStreak(h) {
+    function getStreak(h) {
         if (!h.length) return 0;
         const dates = [...new Set(h.map(i => new Date(i.start).toDateString()))];
-        let s = 0, d = new Date();
-        if (!dates.includes(d.toDateString())) d.setDate(d.getDate() - 1);
-        while (dates.includes(d.toDateString())) { s++; d.setDate(d.getDate() - 1); }
-        return s;
-    },
-
-    // --- ITEM ACTIONS ---
-    updateItemNotes(id, el) {
-        const h = this.db.get('prayerHistory');
-        const idx = h.findIndex(i => i.id === id);
-        if (idx > -1) { h[idx].pointers = el.innerHTML; this.db.set('prayerHistory', h); }
-    },
-
-    deleteItem(id) {
-        if (confirm("Delete this session?")) {
-            const h = this.db.get('prayerHistory').filter(i => i.id !== id);
-            this.db.set('prayerHistory', h);
-            this.renderHistory();
-        }
-    },
-
-    copyItem(id) {
-        const i = this.db.get('prayerHistory').find(x => x.id === id);
-        navigator.clipboard.writeText(this.strip(i.pointers)).then(() => alert("Notes copied!"));
-    },
-
-    setGoal() {
-        const g = prompt("Daily goal (minutes):", this.db.get('dailyGoal', '0'));
-        if (g !== null) { this.db.set('dailyGoal', parseInt(g) || 0); this.renderHistory(); }
-    },
-
-    // --- BACKUP & EXPORT ---
-    toggleAdmin() { document.getElementById('admin-tools').classList.toggle('open'); },
-
-    exportCSV() {
-        const h = this.db.get('prayerHistory');
-        let csv = "Date,Minutes,Notes\n";
-        h.forEach(i => {
-            const clean = this.strip(i.pointers).replace(/"/g, '""');
-            csv += `${new Date(i.start).toLocaleString().replace(/,/g,'')},${Math.round(i.duration/60)},"${clean}"\n`;
-        });
-        const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `prayer_export.csv`;
-        a.click();
-    },
-
-    backupJSON() {
-        const data = { history: this.db.get('prayerHistory'), goal: this.db.get('dailyGoal', '0'), pointers: this.db.getPointers() };
-        const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `prayer_backup_${new Date().toISOString().slice(0,10)}.json`;
-        a.click();
-    },
-
-    restoreJSON(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = ev => {
-            try {
-                const data = JSON.parse(ev.target.result);
-                if (data.history) this.db.set('prayerHistory', data.history);
-                if (data.goal) this.db.set('dailyGoal', data.goal);
-                if (data.pointers) this.db.savePointers(data.pointers);
-                location.reload();
-            } catch { alert("Invalid backup file."); }
-        };
-        reader.readAsText(file);
+        let streak = 0, check = new Date(); if (!dates.includes(check.toDateString())) check.setDate(check.getDate() - 1);
+        while (dates.includes(check.toDateString())) { streak++; check.setDate(check.getDate() - 1); }
+        return streak;
     }
-};
 
-// Start App
-app.init();
+    function copyItem(id) {
+        const i = db.getHistory().find(x => x.id == id);
+        const t = document.createElement("div"); t.innerHTML = i.pointers || "";
+        navigator.clipboard.writeText(t.innerText || t.textContent).then(() => alert("Copied Plain Text!"));
+    }
+
+    function exportCSV() {
+        const h = db.getHistory(); let csv = "Date,Duration(Min),Notes\n";
+        h.forEach(i => {
+            const t = document.createElement("div"); t.innerHTML = i.pointers || "";
+            const p = (t.innerText || t.textContent).replace(/"/g, '""');
+            csv += `${new Date(i.start).toLocaleString().replace(/,/g,'')},${Math.round(i.duration/60)},"${p}"\n`;
+        });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' }));
+        a.download = `prayer_log.csv`; a.click();
+    }
+
+    function backupJSON() {
+        const d = { history: db.getHistory(), goal: db.getGoal(), pointers: db.getPointers() };
+        const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(d)], {type:'application/json'}));
+        a.download = `prayer_backup.json`; a.click();
+    }
+
+    function restoreJSON(e) {
+        const f = e.target.files[0]; if (!f) return;
+        const r = new FileReader(); r.onload = ev => {
+            const d = JSON.parse(ev.target.result);
+            if (d.history) db.saveHistory(d.history); if (d.goal) db.setGoal(d.goal); if (d.pointers) db.savePointers(d.pointers);
+            location.reload();
+        }; r.readAsText(f);
+    }
 </script>
 </body>
 </html>
