@@ -35,13 +35,27 @@
             box-sizing: border-box; font-size: 16px; margin-bottom: 12px;
         }
         #main-pointers, #manual-pointers { height: 264px; overflow-y: auto; text-align: left; line-height: 1.5; white-space: pre-wrap; outline: none; }
-        #manual-pointers { height: 240px; }
+        
+        /* Updated: Taller manual entry box */
+        #manual-pointers { height: 250px; }
 
+        /* Updated: Timer Box Padding & Spacing */
         .timer-box {
             background: linear-gradient(145deg, #1e1e1e, #222);
-            padding: 15px 20px 20px; border-radius: 20px; text-align: center;
+            padding: 15px 20px 20px; /* Top 15, Sides 20, Bottom 20 */
+            border-radius: 20px; text-align: center;
             margin: 10px 0; border: 1px solid #333;
         }
+        
+        /* Start Button Pulse Animation */
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 0 0 rgba(187, 134, 252, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(187, 134, 252, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(187, 134, 252, 0); }
+        }
+        #start-btn { animation: pulse-glow 2s infinite; transition: all 0.3s ease; }
+        #start-btn:active { transform: scale(0.98); animation: none; }
+
         #display-time { font-size: 3.5rem; font-weight: bold; font-family: monospace; color: var(--accent); }
         .btn { border: none; font-weight: bold; cursor: pointer; padding: 15px; border-radius: 12px; }
         .primary { background: var(--accent); color: #000; }
@@ -54,8 +68,16 @@
         .dash-item { text-align: center; flex: 1; }
         .dash-val { display: block; font-size: 1.2rem; font-weight: bold; color: var(--accent); }
         .dash-lbl { font-size: 0.65rem; color: #888; text-transform: uppercase; margin-top: 4px; display: block; }
-        .dash-footer { display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid #333; font-size: 0.75rem; color: #666; }
-        
+        .dash-footer { display: flex; justify-content: space-between; padding-top: 10px; margin-top: 10px; border-top: 1px solid #333; font-size: 0.75rem; color: #888;
+        }
+
+        /* Unified Editable Style */
+        .editable-stat {
+            text-decoration: underline dashed var(--accent);
+            text-underline-offset: 3px;
+            cursor: pointer;
+        }
+
         .year-head { font-size: 1.3rem; font-weight: bold; color: var(--accent); margin: 25px 0 5px 0; }
         .month-head { font-size: 0.85rem; color: #888; text-transform: uppercase; margin: 10px 0 5px 0; border-bottom: 1px solid #222; padding-bottom: 4px; }
         
@@ -82,24 +104,6 @@
         
         .hidden { display: none !important; }
         .verse-footer { margin-top: 30px; text-align: center; font-size: 0.8rem; color: #555; font-style: italic; }
-
-        @keyframes pulse-glow {
-    0% { box-shadow: 0 0 0 0 rgba(187, 134, 252, 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(187, 134, 252, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(187, 134, 252, 0); }
-}
-
-#start-btn {
-    animation: pulse-glow 2s infinite;
-    transition: all 0.3s ease;
-}
-
-#start-btn:active {
-    transform: scale(0.98);
-    animation: none;
-}
-        
-    
     </style>
 </head>
 <body>
@@ -111,11 +115,8 @@
         <div id="recovery-details" style="font-family: monospace; color: var(--success); margin: 15px 0; font-size: 1.5rem;">00:00:00</div>
         <div style="display: flex; flex-direction: column; gap: 10px;">
             <button class="btn primary" onclick="handleRecovery('resume')">Resume Session</button>
-            <button class="btn success" onclick="handleRecovery('save')">End Session & Save</button>
-            <button class="btn secondary" 
-        style="background: rgba(207, 102, 121, 0.1); border: 1px solid var(--error); color: var(--error); margin-top: 5px;" 
-        onclick="handleRecovery('discard')">Discard Session</button>
-        
+            <button class="btn success" onclick="handleRecovery('save')">Save & Finish</button>
+            <button class="btn" style="background: rgba(207, 102, 121, 0.1); border: 1px solid var(--error); color: var(--error); margin-top: 5px;" onclick="handleRecovery('discard')">Discard Session</button>
         </div>
     </div>
 </div>
@@ -133,7 +134,7 @@
     </div>
 
     <div id="setup-page">
-        <h3>Prayer & Reflections</h3>
+        <h3 style="margin-top: 0;">Prayer & Reflections</h3>
         <div class="toolbar">
             <button onclick="format('bold')"><b>B</b></button>
             <button onclick="format('italic')"><i>I</i></button>
@@ -182,28 +183,26 @@
 
     <div id="history-page" class="hidden">
         <div class="dash-card">
-    <div class="dash-main">
-        <div class="dash-item">
-            <span id="dash-week-total" class="dash-val">0m</span>
-            <span class="dash-lbl">This Week (M-S)</span>
+            <div class="dash-main">
+                <div class="dash-item">
+                    <span id="dash-week-total" class="dash-val">0m</span>
+                    <span class="dash-lbl">This Week (M-S)</span>
+                </div>
+                <div class="dash-item" onclick="setDailyGoal()">
+                    <span id="dash-goal-val" class="dash-val" style="text-decoration: underline dashed;">0m</span>
+                    <span class="dash-lbl">Daily Goal 🎯</span>
+                </div>
+                <div class="dash-item">
+                    <span id="dash-streak" class="dash-val">0</span>
+                    <span class="dash-lbl">Streak 🔥</span>
+                </div>
+            </div>
+            <div class="dash-footer">
+                <span id="stat-total-hours">Total: 0h</span>
+                <span id="stat-count">Sessions: 0</span>
+            </div>
         </div>
-        <div class="dash-item" onclick="setDailyGoal()">
-            <span id="dash-goal-val" class="dash-val" style="text-decoration: underline dashed;">0m</span>
-            <span class="dash-lbl">Daily Goal 🎯</span>
-        </div>
-        <div class="dash-item">
-            <span id="dash-streak" class="dash-val">0</span>
-            <span class="dash-lbl">Streak 🔥</span>
-        </div>
-    </div>
 
-    <div class="dash-footer">
-        <span id="stat-total-hours">Total: 0h</span>
-        <span id="stat-count">Sessions: 0</span>
-    </div>
-        </div>
-        
-        
         <button class="admin-toggle" onclick="document.getElementById('admin-tools').classList.toggle('open')">⚙️ Data & Backups</button>
         <div id="admin-tools">
             <button class="admin-btn" onclick="exportCSV()">📊 Export to CSV</button>
@@ -217,23 +216,21 @@
 
     <div id="about-page" class="hidden">
         <h3>User Guide</h3>
-<div style="line-height: 1.6; color: #bbb; font-size: 0.9rem;">
-    <h4 style="color:var(--accent); margin: 15px 0 5px 0;">⏺ Recording Sessions</h4>
-    <p>Use the <strong>Timer</strong> tab to record in real-time. Type your prayer pointers or reflections in the textbox. If you close the app accidentally, you will be able to resume or save the last session when you return.</p>
+        <div style="line-height: 1.6; color: #bbb; font-size: 0.9rem;">
+            <h4 style="color:var(--accent); margin: 15px 0 5px 0;">⏺ Recording Sessions</h4>
+            <p>Use the <strong>Timer</strong> tab to record in real-time. Session stays active once the timer starts. Type your prayer pointers or reflections in the textbox.</p>
 
-    <h4 style="color:var(--accent); margin: 15px 0 5px 0;">✍️ Manual Entry</h4>
-    <p>Use the <strong>Log</strong> tab to record down past sessions. Select your start and end times, enter your prayer pointers or reflections, and save. The session will be added to your history.</p>
+            <h4 style="color:var(--accent); margin: 15px 0 5px 0;">✍️ Manual Entry</h4>
+            <p>Use the <strong>Log</strong> tab to save past sessions. Select your start and end times, and type in your prayer pointers or reflections.</p>
 
-    <h4 style="color:var(--accent); margin: 15px 0 5px 0;">📅 Managing History</h4>
-    <p>In the <strong>History</strong> tab, tap any day to see its sessions. You can <strong>edit</strong> directly in the text box, tap the start time or duration to <strong>adjust the time</strong>, or delete a session.</p>
-
-    <h4 style="color:var(--accent); margin: 15px 0 5px 0;">💾 Data & Privacy</h4>
-    <p>Data is stored only in your browser and on your device. No data is sent out of your device and nobody else can read your sessions. Use <strong>JSON Backup</strong> regularly to ensure you can restore your history if you clear your browser cache or switch devices.</p>
-</div>
-
-        
+            <h4 style="color:var(--accent); margin: 15px 0 5px 0;">📅 Managing History</h4>
+            <p>Tap any day in <strong>History</strong> to view the sessions of that day. Tap the daily goal, time or duration to edit them. Type directly in the text area to edit the notes.</p>
+            
+            <h4 style="color:var(--accent); margin: 15px 0 5px 0;">💾 Data & Privacy</h4>
+            <p>All data stays on your device only. Nobody can read your notes. Use <strong>JSON Backup</strong> regularly. This can be used to restore your history to another device or browser.</p>
+        </div>
         <button class="btn primary full-width" style="margin-top:20px;" onclick="showPage('setup')">Back</button>
-    </div>            
+    </div>
 </div>
 
 <script>
@@ -378,38 +375,27 @@
         db.saveHistory(h); showPage('history');
     }
 
-        function loadHistory() {
+    function loadHistory() {
         const history = db.getHistory().sort((a,b) => new Date(b.start) - new Date(a.start));
         const list = document.getElementById('history-list');
-        const goal = db.getGoal(); 
-        list.innerHTML = "";
-        
+        const goal = db.getGoal(); list.innerHTML = "";
         let weeklyMins = 0, lastYear = null, lastMonth = null;
         
-        // Setup for "This Week (M-S)" logic
         const now = new Date();
         const startOfWeek = new Date(now);
-        // Adjust to Monday (1). If Sunday (0), go back 6 days.
         startOfWeek.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
         startOfWeek.setHours(0,0,0,0);
 
-        // Group history by Day
         const grouped = history.reduce((acc, item) => {
             const dayKey = new Date(item.start).toDateString();
             if (!acc[dayKey]) acc[dayKey] = { items: [], total: 0, date: new Date(item.start) };
-            acc[dayKey].items.push(item); 
-            acc[dayKey].total += (item.duration / 60);
+            acc[dayKey].items.push(item); acc[dayKey].total += (item.duration / 60);
             return acc;
         }, {});
 
-        // Render the History List
         Object.values(grouped).forEach(day => {
             if (day.date >= startOfWeek) weeklyMins += day.total;
-            
-            const year = day.date.getFullYear();
-            const month = day.date.toLocaleString('default', { month: 'long' });
-            
-            // Year/Month Headers
+            const year = day.date.getFullYear(), month = day.date.toLocaleString('default', { month: 'long' });
             if (year !== lastYear) { 
                 const y = document.createElement('div'); y.className="year-head"; y.innerText=year; list.appendChild(y); lastYear=year; 
             }
@@ -420,8 +406,7 @@
             const dayId = day.date.getTime();
             const colorClass = (goal > 0 && day.total >= goal) ? 'var(--success)' : '#888';
             
-            const dayEl = document.createElement('div'); 
-            dayEl.className = "history-day-group";
+            const dayEl = document.createElement('div'); dayEl.className = "history-day-group";
             dayEl.innerHTML = `
                 <div class="day-summary" onclick="toggleDay('${dayId}')">
                     <div><span class="chevron">▸</span><span style="font-size:0.95rem">${day.date.toLocaleDateString([], {day:'numeric', month:'short'})}</span></div>
@@ -431,8 +416,8 @@
                     ${day.items.map(i => `
                         <div class="session-item">
                             <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#888; margin-bottom:5px;">
-                                <span>${new Date(i.start).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
-                                <span onclick="editDur(${i.id})" style="text-decoration:underline dashed; cursor:pointer;">${Math.round(i.duration/60)}m</span>
+                                <span onclick="editStart(${i.id})" class="editable-stat">${new Date(i.start).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                                <span onclick="editDur(${i.id})" class="editable-stat">${Math.round(i.duration/60)}m</span>
                             </div>
                             <span class="editable-text" contenteditable="true" onblur="updateNotes(${i.id}, this)">${i.pointers || ""}</span>
                             <div class="action-bar">
@@ -445,26 +430,44 @@
             list.appendChild(dayEl);
         });
 
-        // Update Dashboard Values
         const hw = Math.floor(weeklyMins / 60);
         const mw = Math.round(weeklyMins % 60);
         document.getElementById('dash-week-total').innerText = hw > 0 ? `${hw}h ${mw}m` : `${mw}m`;
         document.getElementById('dash-goal-val').innerText = goal + "m";
         document.getElementById('dash-streak').innerText = getStreak(history);
-
+        
+        // Footer Stats
         const totalSessions = history.length;
-        const totalHours = (history.reduce((acc, i) => acc + (i.duration / 3600), 0)).toFixed(1);
-
-document.getElementById('stat-count').innerText = "Sessions: " + totalSessions;
-document.getElementById('stat-total-hours').innerText = "Total: " + totalHours + "h";
-            
-    }
+        const totalSeconds = history.reduce((acc, i) => acc + i.duration, 0);
+        const th = Math.floor(totalSeconds / 3600);
+        const tm = Math.floor((totalSeconds % 3600) / 60);
     
+        // Format as "Xh Ym" or just "Ym"
+        const timeStr = th > 0 ? `${th}h ${tm}m` : `${tm}m`;
+
+        document.getElementById('stat-count').innerText = "Sessions: " + totalSessions;
+        document.getElementById('stat-total-hours').innerText = "Total: " + timeStr;
+    }
 
     function toggleDay(id) { openDay = (openDay == id) ? null : id; loadHistory(); }
     function updateNotes(id, el) { const h = db.getHistory(); const idx = h.findIndex(i => i.id === id); h[idx].pointers = el.innerHTML; db.saveHistory(h); }
     function deleteItem(id) { if(confirm("Delete?")) { db.saveHistory(db.getHistory().filter(i => i.id !== id)); loadHistory(); } }
+    
     function editDur(id) { const h = db.getHistory(); const idx = h.findIndex(i => i.id === id); const val = prompt("Minutes:", Math.round(h[idx].duration/60)); if(val) { h[idx].duration = parseInt(val)*60; db.saveHistory(h); loadHistory(); } }
+    
+    function editStart(id) {
+        const h = db.getHistory(); const idx = h.findIndex(i => i.id === id);
+        const current = new Date(h[idx].start);
+        const currentTime = current.getHours().toString().padStart(2, '0') + ":" + current.getMinutes().toString().padStart(2, '0');
+        const newVal = prompt("Edit Start Time (24h format HH:mm):", currentTime);
+        if (newVal && newVal.includes(":")) {
+            const [hours, minutes] = newVal.split(":");
+            current.setHours(parseInt(hours), parseInt(minutes));
+            h[idx].start = current.toISOString();
+            db.saveHistory(h); loadHistory();
+        }
+    }
+
     function setDailyGoal() { const val = prompt("Goal (mins):", db.getGoal()); if(val !== null) { db.setGoal(parseInt(val)); loadHistory(); } }
 
     function getStreak(h) {
@@ -480,41 +483,30 @@ document.getElementById('stat-total-hours').innerText = "Total: " + totalHours +
         const t = document.createElement("div"); 
         t.innerHTML = i.pointers || "";
         const plainText = t.innerText; 
-        navigator.clipboard.writeText(plainText).then(() => alert("Copied text."));
+        navigator.clipboard.writeText(plainText).then(() => alert("Copied text!"));
     }
 
     function exportCSV() {
-    const h = db.getHistory(); 
-    let csv = "Date,Duration(Min),Notes\n";
-    
-    h.forEach(i => {
-        // Create a temporary element to process the HTML
-        const temp = document.createElement("div");
-        temp.innerHTML = i.pointers || "";
+        const h = db.getHistory(); 
+        let csv = "Date,Duration(Min),Notes\n";
         
-        // 1. Convert <div> and <p> tags to newlines
-        // 2. Convert <br> tags to newlines
-        let textWithLines = temp.innerHTML
-            .replace(/<\/div>| <\/p>/gi, '\n') 
-            .replace(/<br\s*[\/]?>/gi, '\n')
-            .replace(/<[^>]+>/g, ''); // 3. Strip all other HTML tags
-            
-        // Clean up leading/trailing white space and escape quotes for CSV
-        const finalPointers = textWithLines.trim().replace(/"/g, '""');
+        h.forEach(i => {
+            const temp = document.createElement("div"); temp.innerHTML = i.pointers || "";
+            let textWithLines = temp.innerHTML
+                .replace(/<\/div>| <\/p>/gi, '\n') 
+                .replace(/<br\s*[\/]?>/gi, '\n')
+                .replace(/<[^>]+>/g, '');
+            const finalPointers = textWithLines.trim().replace(/"/g, '""');
+            const d = new Date(i.start).toISOString().replace('T', ' ').substring(0, 16);
+            csv += `${d},${Math.round(i.duration/60)},"${finalPointers}"\n`;
+        });
         
-        // Use ISO date to prevent comma issues
-        const d = new Date(i.start).toISOString().replace('T', ' ').substring(0, 16);
-        
-        csv += `${d},${Math.round(i.duration/60)},"${finalPointers}"\n`;
-    });
-    
-    // Explicit UTF-8 BOM to prevent Chinese character errors
-    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-    const blob = new Blob([bom, csv], { type: 'text/csv;charset=utf-8;' });
-    const a = document.createElement('a'); 
-    a.href = URL.createObjectURL(blob);
-    a.download = `prayer_log.csv`; 
-    a.click();
+        const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+        const blob = new Blob([bom, csv], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement('a'); 
+        a.href = URL.createObjectURL(blob);
+        a.download = `prayer_log.csv`; 
+        a.click();
     }
 
     function backupJSON() {
