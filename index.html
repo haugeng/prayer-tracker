@@ -368,6 +368,14 @@
     function saveManualLog() {
         const s = new Date(document.getElementById('manual-start').value);
         const e = new Date(document.getElementById('manual-end').value);
+        const now = new Date(); // Current time
+
+        // Prevent future entries
+        if (e > now) {
+            alert("The end time cannot be in the future. Please select a time that has already passed.");
+            return;
+        }
+
         const diff = Math.floor((e - s) / 1000);
         if (diff <= 0) return alert("End time must be after Start time.");
         const h = db.getHistory();
@@ -453,20 +461,56 @@
     function updateNotes(id, el) { const h = db.getHistory(); const idx = h.findIndex(i => i.id === id); h[idx].pointers = el.innerHTML; db.saveHistory(h); }
     function deleteItem(id) { if(confirm("Delete?")) { db.saveHistory(db.getHistory().filter(i => i.id !== id)); loadHistory(); } }
     
-    function editDur(id) { const h = db.getHistory(); const idx = h.findIndex(i => i.id === id); const val = prompt("Minutes:", Math.round(h[idx].duration/60)); if(val) { h[idx].duration = parseInt(val)*60; db.saveHistory(h); loadHistory(); } }
+function editDur(id) { 
+    const h = db.getHistory(); 
+    const idx = h.findIndex(i => i.id === id);
+    const item = h[idx];
+    
+    const val = prompt("Minutes:", Math.round(item.duration/60)); 
+    if (val) { 
+        const newDurationSeconds = parseInt(val) * 60;
+        const startTime = new Date(item.start);
+        const newEnd = new Date(startTime.getTime() + (newDurationSeconds * 1000));
+
+        if (newEnd > new Date()) {
+            alert("The new duration would make this session end in the future. Please enter a shorter duration.");
+            return;
+        }
+
+        item.duration = newDurationSeconds; 
+        db.saveHistory(h); 
+        loadHistory(); 
+    } 
+}
     
     function editStart(id) {
-        const h = db.getHistory(); const idx = h.findIndex(i => i.id === id);
-        const current = new Date(h[idx].start);
-        const currentTime = current.getHours().toString().padStart(2, '0') + ":" + current.getMinutes().toString().padStart(2, '0');
-        const newVal = prompt("Edit Start Time (24h format HH:mm):", currentTime);
-        if (newVal && newVal.includes(":")) {
-            const [hours, minutes] = newVal.split(":");
-            current.setHours(parseInt(hours), parseInt(minutes));
-            h[idx].start = current.toISOString();
-            db.saveHistory(h); loadHistory();
+    const h = db.getHistory(); 
+    const idx = h.findIndex(i => i.id === id);
+    const item = h[idx];
+    const current = new Date(item.start);
+    
+    const currentTime = current.getHours().toString().padStart(2, '0') + ":" + current.getMinutes().toString().padStart(2, '0');
+    const newVal = prompt("Edit Start Time (24h format HH:mm):", currentTime);
+    
+    if (newVal && newVal.includes(":")) {
+        const [hours, minutes] = newVal.split(":");
+        const newStart = new Date(item.start);
+        newStart.setHours(parseInt(hours), parseInt(minutes));
+        
+        // Calculate the new end time (Start + Duration)
+        const newEnd = new Date(newStart.getTime() + (item.duration * 1000));
+        
+        if (newEnd > new Date()) {
+            alert("This change would result in a session ending in the future. Please adjust the time.");
+            return;
         }
+
+        item.start = newStart.toISOString();
+        db.saveHistory(h); 
+        loadHistory();
     }
+    }
+    
 
     function setDailyGoal() { const val = prompt("Goal (mins):", db.getGoal()); if(val !== null) { db.setGoal(parseInt(val)); loadHistory(); } }
 
