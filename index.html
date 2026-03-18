@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>My Prayer Tracker</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#121212">
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Prayer Tracker","short_name":"Pray","start_url":".","display":"standalone","background_color":"#121212","theme_color":"#bb86fc","icons":[{"src":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iIzEyMTIxMiIvPjxjaXJjbGUgY3g9IjI1NiIgY3k9IjI1NiIgcj0iMTYwIiBmaWxsPSJub25lIiBzdHJva2U9IiNiYjg2ZmMiIHN0cm9rZS13aWR0aD0iMjAiLz48cGF0aCBkPSJNMjU2IDk2djMyME05NiAyNTZoMzIwIiBzdHJva2U9IiNiYjg2ZmMiIHN0cm9rZS13aWR0aD0iMjAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvc3ZnPg==","sizes":"512x512","type":"image/png"}]}'>
+    
     <style>
         :root {
             --bg: #121212; --card: #1e1e1e; --text: #e0e0e0;
@@ -568,5 +574,31 @@ function editDur(id) {
         }; r.readAsText(f);
     }
 </script>
+
+<script>
+// --- SERVICE WORKER FOR INSTANT LOADING ---
+if ('serviceWorker' in navigator) {
+    const version = 'v4.0.2'; // Change this if you ever edit the code
+    const swCode = `
+        const cacheName = 'prayer-tracker-' + '${version}';
+        self.addEventListener('install', e => {
+            self.skipWaiting(); 
+            e.waitUntil(caches.open(cacheName).then(cache => cache.addAll(['./', 'index.html'])));
+        });
+        self.addEventListener('activate', e => {
+            self.clients.claim(); 
+            e.waitUntil(caches.keys().then(keys => Promise.all(
+                keys.map(k => k !== cacheName ? caches.delete(k) : null)
+            )));
+        });
+        self.addEventListener('fetch', e => {
+            e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
+        });
+    `;
+    const blob = new Blob([swCode], {type: 'text/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(blob));
+}
+</script>
+    
 </body>
 </html>
