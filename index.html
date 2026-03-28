@@ -92,8 +92,24 @@
         .chevron { display: inline-block; margin-right: 10px; transition: transform 0.2s ease; color: var(--accent); font-size: 0.8rem; }
         .expanded .chevron { transform: rotate(90deg); }
         
-        .sessions-container { max-height: 0; overflow: hidden; transition: all 0.3s ease; background: #161616; border-radius: 10px; }
+        .sessions-container { max-height: 0; overflow: hidden; background: #161616; border-radius: 10px; }
         .sessions-container.expanded { max-height: 10000px; padding: 10px; margin-bottom: 15px; border: 1px solid #333; }
+
+        /* Toast */
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #333; color: #eee; padding: 10px 20px; border-radius: 20px; font-size: 0.85rem; pointer-events: none; opacity: 0; transition: opacity 0.25s ease; z-index: 200; white-space: nowrap; }
+        #toast.show { opacity: 1; }
+
+        /* Inline modal */
+        #modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 150; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .modal-card { background: var(--card); border-radius: 16px; border: 1px solid #444; padding: 22px; width: 100%; max-width: 320px; }
+        .modal-card h4 { margin: 0 0 14px 0; font-size: 1rem; color: var(--accent); }
+        .modal-card input { margin-bottom: 10px; }
+        .modal-card label { font-size: 0.72rem; color: #888; display: block; margin-bottom: 4px; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.04em; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 16px; }
+        .modal-btns button { flex: 1; padding: 11px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
+        .modal-cancel { background: #2a2a2a; color: #aaa; }
+        .modal-confirm { background: var(--accent); color: #000; }
+        .modal-danger { background: var(--error); color: #fff; }
         .session-item { border-bottom: 1px solid #222; padding: 12px 0; }
         .editable-text { white-space: pre-wrap; color: #ccc; outline: none; font-style: italic; line-height: 1.6; font-size: 14px; width: 100%; display: block; }
         
@@ -113,6 +129,9 @@
     </style>
 </head>
 <body>
+
+<div id="toast"></div>
+<div id="modal-overlay" class="hidden"></div>
 
 <div id="recovery-overlay" class="hidden">
     <div class="recovery-card">
@@ -242,14 +261,14 @@
 <script>
     const db = {
         getHistory: () => JSON.parse(localStorage.getItem('prayerHistory') || "[]"),
-        saveHistory: (data) => localStorage.setItem('prayerHistory', JSON.stringify(data)),
+        saveHistory: (data) => { localStorage.setItem('prayerHistory', JSON.stringify(data)); historyDirty = true; },
         getPointers: () => localStorage.getItem('mainPointers') || "",
         savePointers: (txt) => localStorage.setItem('mainPointers', txt),
         getGoal: () => parseInt(localStorage.getItem('dailyGoal') || "0"),
-        setGoal: (val) => localStorage.setItem('dailyGoal', val)
+        setGoal: (val) => { localStorage.setItem('dailyGoal', val); historyDirty = true; }
     };
 
-    let timerInterval, autosaveInterval, elapsedSeconds = 0, isPaused = false, startTime = null, wakeLock = null, openDay = null, shouldKeepAwake = false;
+    let timerInterval, autosaveInterval, elapsedSeconds = 0, isPaused = false, startTime = null, wakeLock = null, openDay = null, shouldKeepAwake = false, historyDirty = false;
 
     const mainPointersEl = document.getElementById('main-pointers');
     mainPointersEl.innerHTML = db.getPointers();
@@ -265,6 +284,7 @@
     });
 
     window.onload = () => {
+        historyDirty = true;
         const saved = JSON.parse(localStorage.getItem('activeSession'));
         if (saved && saved.startTime) {
             const start = new Date(saved.startTime);
@@ -374,22 +394,18 @@
     function saveManualLog() {
         const s = new Date(document.getElementById('manual-start').value);
         const e = new Date(document.getElementById('manual-end').value);
-        const now = new Date(); // Current time
-
-        // Prevent future entries
-        if (e > now) {
-            alert("The end time cannot be in the future. Please select a time that has already passed.");
-            return;
-        }
-
+        const now = new Date();
+        if (e > now) { showToast("End time can't be in the future."); return; }
         const diff = Math.floor((e - s) / 1000);
-        if (diff <= 0) return alert("End time must be after Start time.");
+        if (diff <= 0) { showToast("End time must be after start time."); return; }
         const h = db.getHistory();
         h.push({ id: Date.now(), start: s.toISOString(), duration: diff, pointers: document.getElementById('manual-pointers').innerHTML });
         db.saveHistory(h); showPage('history');
     }
 
     function loadHistory() {
+        if (!historyDirty) return;
+        historyDirty = false;
         const history = db.getHistory().sort((a,b) => new Date(b.start) - new Date(a.start));
         const list = document.getElementById('history-list');
         const goal = db.getGoal(); list.innerHTML = "";
@@ -463,62 +479,136 @@
         document.getElementById('stat-total-hours').innerText = "Total: " + timeStr;
     }
 
-    function toggleDay(id) { openDay = (openDay == id) ? null : id; loadHistory(); }
-    function updateNotes(id, el) { const h = db.getHistory(); const idx = h.findIndex(i => i.id === id); h[idx].pointers = el.innerHTML; db.saveHistory(h); }
-    function deleteItem(id) { if(confirm("Delete?")) { db.saveHistory(db.getHistory().filter(i => i.id !== id)); loadHistory(); } }
-    
-function editDur(id) { 
-    const h = db.getHistory(); 
-    const idx = h.findIndex(i => i.id === id);
-    const item = h[idx];
-    
-    const val = prompt("Minutes:", Math.round(item.duration/60)); 
-    if (val) { 
-        const newDurationSeconds = parseInt(val) * 60;
-        const startTime = new Date(item.start);
-        const newEnd = new Date(startTime.getTime() + (newDurationSeconds * 1000));
+    // ── Toast ────────────────────────────────────────────────
+    let toastTimer;
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg; t.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+    }
 
-        if (newEnd > new Date()) {
-            alert("The new duration would make this session end in the future. Please enter a shorter duration.");
-            return;
-        }
+    // ── Modal ────────────────────────────────────────────────
+    function showModal(html, onConfirm, onCancel) {
+        const overlay = document.getElementById('modal-overlay');
+        overlay.innerHTML = `<div class="modal-card">${html}</div>`;
+        overlay.classList.remove('hidden');
+        overlay.querySelector('.modal-confirm')?.addEventListener('click', () => { closeModal(); onConfirm(); });
+        overlay.querySelector('.modal-cancel')?.addEventListener('click', () => { closeModal(); if (onCancel) onCancel(); });
+        overlay.querySelector('.modal-danger')?.addEventListener('click', () => { closeModal(); onConfirm(); });
+        overlay.addEventListener('click', e => { if (e.target === overlay) { closeModal(); if (onCancel) onCancel(); } });
+    }
+    function closeModal() { document.getElementById('modal-overlay').classList.add('hidden'); }
 
-        item.duration = newDurationSeconds; 
-        db.saveHistory(h); 
-        loadHistory(); 
-    } 
-}
-    
+    // ── History helpers ──────────────────────────────────────
+    function toggleDay(id) { openDay = (openDay == id) ? null : id; historyDirty = true; loadHistory(); }
+
+    function updateNotes(id, el) {
+        const h = db.getHistory();
+        const idx = h.findIndex(i => i.id === id);
+        h[idx].pointers = el.innerHTML;
+        db.saveHistory(h);
+        // notes are already live via contenteditable — no need to re-render
+        historyDirty = false;
+    }
+
+    function deleteItem(id) {
+        showModal(
+            `<h4>Delete session?</h4><p style="color:#aaa;font-size:0.9rem;margin:0">This can't be undone.</p>
+             <div class="modal-btns">
+               <button class="modal-cancel">Cancel</button>
+               <button class="modal-danger">Delete</button>
+             </div>`,
+            () => { db.saveHistory(db.getHistory().filter(i => i.id !== id)); loadHistory(); }
+        );
+    }
+
+    function editDur(id) {
+        const h = db.getHistory();
+        const idx = h.findIndex(i => i.id === id);
+        const item = h[idx];
+        const current = Math.round(item.duration / 60);
+        showModal(
+            `<h4>Edit Duration</h4>
+             <label>Minutes</label>
+             <input id="m-dur" type="number" min="1" value="${current}" style="text-align:center;">
+             <div class="modal-btns">
+               <button class="modal-cancel">Cancel</button>
+               <button class="modal-confirm">Save</button>
+             </div>`,
+            () => {
+                const val = parseInt(document.getElementById('m-dur').value);
+                if (!val || val < 1) { showToast("Enter a valid number of minutes."); return; }
+                const newDurationSeconds = val * 60;
+                const newEnd = new Date(new Date(item.start).getTime() + newDurationSeconds * 1000);
+                if (newEnd > new Date()) { showToast("Duration would end in the future."); return; }
+                item.duration = newDurationSeconds;
+                db.saveHistory(h); loadHistory();
+            }
+        );
+        // Focus the input after modal renders
+        setTimeout(() => { const el = document.getElementById('m-dur'); if (el) { el.focus(); el.select(); } }, 50);
+    }
+
     function editStart(id) {
-    const h = db.getHistory(); 
-    const idx = h.findIndex(i => i.id === id);
-    const item = h[idx];
-    const current = new Date(item.start);
-    
-    const currentTime = current.getHours().toString().padStart(2, '0') + ":" + current.getMinutes().toString().padStart(2, '0');
-    const newVal = prompt("Edit Start Time (24h format HH:mm):", currentTime);
-    
-    if (newVal && newVal.includes(":")) {
-        const [hours, minutes] = newVal.split(":");
-        const newStart = new Date(item.start);
-        newStart.setHours(parseInt(hours), parseInt(minutes));
-        
-        // Calculate the new end time (Start + Duration)
-        const newEnd = new Date(newStart.getTime() + (item.duration * 1000));
-        
-        if (newEnd > new Date()) {
-            alert("This change would result in a session ending in the future. Please adjust the time.");
-            return;
-        }
-
-        item.start = newStart.toISOString();
-        db.saveHistory(h); 
-        loadHistory();
+        const h = db.getHistory();
+        const idx = h.findIndex(i => i.id === id);
+        const item = h[idx];
+        const current = new Date(item.start);
+        const dateStr = current.getFullYear() + "-" +
+            (current.getMonth()+1).toString().padStart(2,'0') + "-" +
+            current.getDate().toString().padStart(2,'0');
+        const timeStr = current.getHours().toString().padStart(2,'0') + ":" +
+            current.getMinutes().toString().padStart(2,'0');
+        showModal(
+            `<h4>Edit Start Time</h4>
+             <label>Date</label>
+             <input id="m-date" type="date" value="${dateStr}">
+             <label>Time (24h)</label>
+             <input id="m-time" type="time" value="${timeStr}">
+             <div class="modal-btns">
+               <button class="modal-cancel">Cancel</button>
+               <button class="modal-confirm">Save</button>
+             </div>`,
+            () => {
+                const d = document.getElementById('m-date').value;
+                const t = document.getElementById('m-time').value;
+                if (!d || !t) { showToast("Please fill in both fields."); return; }
+                const newStart = new Date(d + "T" + t + ":00");
+                if (isNaN(newStart.getTime())) { showToast("Invalid date or time."); return; }
+                const newEnd = new Date(newStart.getTime() + item.duration * 1000);
+                if (newEnd > new Date()) { showToast("This would make the session end in the future."); return; }
+                item.start = newStart.toISOString();
+                db.saveHistory(h); loadHistory();
+            }
+        );
     }
-    }
-    
 
-    function setDailyGoal() { const val = prompt("Goal (mins):", db.getGoal()); if(val !== null) { db.setGoal(parseInt(val)); loadHistory(); } }
+    function setDailyGoal() {
+        const current = db.getGoal();
+        showModal(
+            `<h4>Daily Goal</h4>
+             <label>Minutes per day</label>
+             <input id="m-goal" type="number" min="0" value="${current || ''}" placeholder="e.g. 30" style="text-align:center;">
+             <div class="modal-btns">
+               <button class="modal-cancel">Cancel</button>
+               <button class="modal-confirm">Save</button>
+             </div>`,
+            () => {
+                const val = parseInt(document.getElementById('m-goal').value);
+                db.setGoal(isNaN(val) ? 0 : val); loadHistory();
+            }
+        );
+        setTimeout(() => { const el = document.getElementById('m-goal'); if (el) { el.focus(); el.select(); } }, 50);
+    }
+
+    function copyItem(id) {
+        const i = db.getHistory().find(x => x.id == id);
+        const t = document.createElement("div");
+        t.innerHTML = i.pointers || "";
+        const plainText = t.innerText;
+        navigator.clipboard.writeText(plainText).then(() => showToast("✓ Copied to clipboard"));
+    }
 
     function getStreak(h) {
         if (!h.length) return 0;
@@ -526,14 +616,6 @@ function editDur(id) {
         let streak = 0, check = new Date(); if (!dates.includes(check.toDateString())) check.setDate(check.getDate() - 1);
         while (dates.includes(check.toDateString())) { streak++; check.setDate(check.getDate() - 1); }
         return streak;
-    }
-
-    function copyItem(id) {
-        const i = db.getHistory().find(x => x.id == id);
-        const t = document.createElement("div"); 
-        t.innerHTML = i.pointers || "";
-        const plainText = t.innerText; 
-        navigator.clipboard.writeText(plainText).then(() => alert("Copied text!"));
     }
 
     function exportCSV() {
