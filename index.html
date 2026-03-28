@@ -490,31 +490,37 @@ function editDur(id) {
 }
     
     function editStart(id) {
-    const h = db.getHistory(); 
-    const idx = h.findIndex(i => i.id === id);
-    const item = h[idx];
-    const current = new Date(item.start);
-    
-    const currentTime = current.getHours().toString().padStart(2, '0') + ":" + current.getMinutes().toString().padStart(2, '0');
-    const newVal = prompt("Edit Start Time (24h format HH:mm):", currentTime);
-    
-    if (newVal && newVal.includes(":")) {
-        const [hours, minutes] = newVal.split(":");
-        const newStart = new Date(item.start);
-        newStart.setHours(parseInt(hours), parseInt(minutes));
+        const h = db.getHistory(); 
+        const idx = h.findIndex(i => i.id === id);
+        const item = h[idx];
+        const current = new Date(item.start);
         
-        // Calculate the new end time (Start + Duration)
-        const newEnd = new Date(newStart.getTime() + (item.duration * 1000));
+        // Format current date as YYYY-MM-DD for the prompt
+        const currentDate = current.getFullYear() + "-" +
+            (current.getMonth()+1).toString().padStart(2,'0') + "-" + current.getDate().toString().padStart(2,'0');
+        const currentTime = current.getHours().toString().padStart(2,'0') + ":" + current.getMinutes().toString().padStart(2,'0');
+    
+        const newDate = prompt("Edit Start Date (YYYY-MM-DD):", currentDate);
+        if (!newDate) return;
         
-        if (newEnd > new Date()) {
-            alert("This change would result in a session ending in the future. Please adjust the time.");
+        const newTime = prompt("Edit Start Time (24h HH:mm):", currentTime);
+        if (!newTime || !newTime.includes(":")) return;
+    
+        const newStart = new Date(newDate + "T" + newTime + ":00");
+        if (isNaN(newStart.getTime())) {
+            alert("Invalid date or time. Please use YYYY-MM-DD and HH:mm format.");
             return;
         }
-
+    
+        const newEnd = new Date(newStart.getTime() + (item.duration * 1000));
+        if (newEnd > new Date()) {
+            alert("This change would result in a session ending in the future. Please adjust.");
+            return;
+        }
+    
         item.start = newStart.toISOString();
         db.saveHistory(h); 
         loadHistory();
-    }
     }
     
 
