@@ -1,4 +1,4 @@
-const cacheName = 'prayer-tracker-v4.2.5';
+const cacheName = 'prayer-tracker-v4.3.0';
 const assets = [
   './',
   'index.html',

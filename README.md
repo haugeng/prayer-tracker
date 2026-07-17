@@ -1,41 +1,25 @@
-# 🙏 Prayer Tracker
+# Prayer Tracker
 
-A lightweight, private, and distraction-free web app designed to help you track your prayer sessions and keep a digital journal of your prayer pointers.
+A simple, private app to help you stay consistent in prayer. Time your sessions, journal your reflections, and track your progress — all without an account or internet connection.
 
 **Link:** https://haugeng.github.io/prayer-tracker
 
-## ✨ Features
+## How to Use
 
-* **Live Timer:** Start a session and watch your duration in real-time.
-* **Stay Awake:** Built-in "Wake Lock" prevents your mobile screen from dimming while you pray.
-* **Manual Logging:** Forgot to start the timer? Log past sessions manually with custom start/end times.
-* **Persistent Pointers:** Your current prayer pointers are automatically saved as you type and snapshotted into your history when a session ends.
-* **Editable History:** Tap on any past session's pointers to refine or update your notes.
-* **Statistics:** View your total prayer minutes and session counts at a glance.
-* **Data Portability:** Export your history to **CSV** (for Excel) or **JSON** (for backups/restoring on other devices).
+1. **Install it** — open the link on your phone, then add to your home screen (iOS: Share → Add to Home Screen; Android: Menu → Install app).
+2. **Pray** — tap Start Prayer, write your reflections, and end the session when you're done. Forgot to start the timer? Use the Log tab to record it after.
+3. **Review** — check your history, set a daily goal, and watch your streak grow.
 
-## 🔒 Privacy
-This app uses **Browser Local Storage**. 
-* Your data is **never** sent to a server or stored on GitHub. 
-* It stays 100% on your device. 
-* Other visitors to the link will see their own data, not yours.
+## Privacy & Security
 
-## 📱 Mobile Setup (Recommended)
-To use this like a native app on your phone:
+- All your data stays on your device in browser storage. Nothing is ever sent to a server.
+- No account, no login, no tracking.
+- Nobody — not even the developer — can see your notes.
 
-### iOS (Safari)
-1. Open the app link in Safari.
-2. Tap the **Share** button (square with up arrow).
-3. Scroll down and tap **Add to Home Screen**.
+## Tips
 
-### Android (Chrome)
-1. Open the app link in Chrome.
-2. Tap the **three dots** (menu) in the top right.
-3. Tap **Install app** or **Add to Home screen**.
-
-## 🛠️ Usage Tips
-* **History Sorting:** The app automatically sorts sessions by the start date, keeping your most recent prayers at the top.
-* **Backups:** Since data is stored in your browser, clearing your browser cache will delete your history. Use the **JSON Backup** feature regularly to keep your data safe.
+- **Back up regularly.** Go to History → Data & Backups → Download JSON Backup. Clearing your browser data will erase your history, but a backup lets you restore it anytime — or load it on another device.
+- **Set a daily goal** to track how often you meet it and stay motivated.
 
 ---
 *Devote yourselves to prayer, being watchful and thankful.*
