@@ -74,8 +74,8 @@
         .dash-item { text-align: center; flex: 1; }
         .dash-val { display: block; font-size: 1.2rem; font-weight: bold; color: var(--accent); }
         .dash-lbl { font-size: 0.65rem; color: #888; text-transform: uppercase; margin-top: 4px; display: block; }
-        .dash-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 0; padding-top: 10px; margin-top: 10px; border-top: 1px solid #333; font-size: 0.75rem; color: #888;
-        }
+        .dash-footer { display: flex; flex-wrap: wrap; gap: 4px 0; padding-top: 10px; margin-top: 10px; border-top: 1px solid #333; font-size: 0.75rem; color: #888; }
+        .dash-footer span { flex: 1; text-align: center; }
 
         /* Unified Editable Style */
         .editable-stat {
@@ -224,7 +224,7 @@
             </div>
             <div class="dash-footer">
                 <span id="stat-last-week">Last Week: —</span>
-                <span id="stat-total">Total: 0h, 0 Sessions</span>
+                <span id="stat-total">Total: 0h</span>
                 <span id="stat-best-streak">Best Streak: 0</span>
             </div>
         </div>
@@ -481,7 +481,7 @@
         // Format as "Xh Ym" or just "Ym"
         const timeStr = th > 0 ? `${th}h ${tm}m` : `${tm}m`;
 
-        document.getElementById('stat-total').innerText = `Total: ${timeStr}, ${totalSessions} Sessions`;
+        document.getElementById('stat-total').innerText = `Total: ${timeStr}`;
 
         const lwh = Math.floor(lastWeekMins / 60), lwm = Math.round(lastWeekMins % 60);
         document.getElementById('stat-last-week').innerText = "Last Week: " + (lwh > 0 ? `${lwh}h ${lwm}m` : `${lwm}m`);
