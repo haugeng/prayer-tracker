@@ -40,8 +40,8 @@
             border: 1px solid #444; border-radius: 12px; padding: 14px;
             box-sizing: border-box; font-size: 16px; margin-bottom: 12px;
         }
-        #main-pointers { height: calc(100dvh - 358px); min-height: 180px; overflow-y: auto; text-align: left; line-height: 1.5; white-space: pre-wrap; outline: none; }
-        #manual-pointers { height: calc(100dvh - 430px); min-height: 180px; overflow-y: auto; text-align: left; line-height: 1.5; white-space: pre-wrap; outline: none; }
+        #main-pointers { height: calc(100dvh - 332px); min-height: 180px; overflow-y: auto; text-align: left; line-height: 1.5; white-space: pre-wrap; outline: none; }
+        #manual-pointers { height: calc(100dvh - 404px); min-height: 180px; overflow-y: auto; text-align: left; line-height: 1.5; white-space: pre-wrap; outline: none; }
         
 
         .timer-box {
@@ -133,16 +133,16 @@
 
         @media (min-width: 768px) {
             .container { max-width: 620px; }
-            #main-pointers { height: calc(100dvh - 382px); }
-            #manual-pointers { height: calc(100dvh - 450px); }
+            #main-pointers { height: calc(100dvh - 356px); }
+            #manual-pointers { height: calc(100dvh - 424px); }
             #display-time { font-size: 3.5rem; }
             .timer-box { padding: 8px 24px 14px; }
             body { padding: 20px; }
         }
         @media (min-width: 1024px) {
             .container { max-width: 720px; }
-            #main-pointers { height: calc(100dvh - 402px); }
-            #manual-pointers { height: calc(100dvh - 470px); }
+            #main-pointers { height: calc(100dvh - 376px); }
+            #manual-pointers { height: calc(100dvh - 444px); }
             body { padding: 30px; }
             .nav button { padding: 14px 10px; font-size: 15px; }
             .dash-card { padding: 20px; }
@@ -177,13 +177,12 @@
     </div>
 
     <div class="nav">
-        <button id="nav-setup" class="active" onclick="showPage('setup')">Timer</button>
+        <button id="nav-setup" class="active" onclick="showPage('setup')">Pray</button>
         <button id="nav-manual" onclick="showPage('manual')">Log</button>
         <button id="nav-history" onclick="showPage('history')">History</button>
     </div>
 
     <div id="setup-page">
-        <h3 style="margin-top: 0; margin-bottom: 6px;">Prayer & Reflections</h3>
         <div class="toolbar">
             <button onclick="format('bold')"><b>B</b></button>
             <button onclick="format('italic')"><i>I</i></button>
@@ -204,7 +203,6 @@
     </div>
 
     <div id="manual-page" class="hidden">
-        <h3>Manual Entry</h3>
         <div style="background: #1a1a1a; padding: 20px; border-radius: 15px; border: 1px solid #333;">
             <label style="font-size: 0.7rem; color: var(--accent); font-weight: bold;">TIME RANGE</label>
             <div style="display: flex; gap: 10px; margin-bottom: 10px;">
@@ -310,17 +308,27 @@
         if (shouldKeepAwake && document.visibilityState === 'visible') { await requestWakeLock(); }
     });
 
+    function checkBackupReminder() {
+        if (parseInt(localStorage.getItem('backupReminder') || '0') >= 30) {
+            showToast('30 sessions since last backup — back up your data!');
+        }
+    }
+    function bumpBackupCounter() {
+        localStorage.setItem('backupReminder', (parseInt(localStorage.getItem('backupReminder') || '0') + 1).toString());
+    }
+
     window.onload = () => {
         historyDirty = true;
+        checkBackupReminder();
         const saved = JSON.parse(localStorage.getItem('activeSession'));
         if (saved && saved.startTime) {
             const start = new Date(saved.startTime);
             const currentDuration = Math.floor((Date.now() - saved.startTime) / 1000);
-            
+
             const h = Math.floor(currentDuration/3600).toString().padStart(2,'0');
             const m = Math.floor((currentDuration%3600)/60).toString().padStart(2,'0');
             const s = (currentDuration%60).toString().padStart(2,'0');
-            
+
             document.getElementById('recovery-details').innerText = `${h}:${m}:${s}`;
             document.getElementById('recovery-timestamp').innerText = `Started: ${start.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
             document.getElementById('recovery-overlay').classList.remove('hidden');
@@ -387,6 +395,7 @@
             const h = db.getHistory();
             h.push({ id: Date.now(), start: new Date(startTime).toISOString(), duration: elapsedSeconds, pointers: mainPointersEl.innerHTML });
             db.saveHistory(h);
+            bumpBackupCounter();
         }
         localStorage.removeItem('activeSession');
         location.reload();
@@ -430,7 +439,7 @@
         if (diff <= 0) { showToast("End time must be after start time."); return; }
         const h = db.getHistory();
         h.push({ id: Date.now(), start: s.toISOString(), duration: diff, pointers: document.getElementById('manual-pointers').innerHTML });
-        db.saveHistory(h); showPage('history');
+        db.saveHistory(h); bumpBackupCounter(); showPage('history');
     }
 
     function loadHistory() {
@@ -695,7 +704,8 @@
     function backupJSON() {
         const d = { history: db.getHistory(), goal: db.getGoal(), pointers: db.getPointers() };
         const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(d)], {type:'application/json'}));
-        a.download = `prayer_backup.json`; a.click();
+        a.download = `prayer_backup_${new Date().toISOString().slice(0,10)}.json`; a.click();
+        localStorage.setItem('backupReminder', '0');
     }
 
     function restoreJSON(e) {
@@ -710,10 +720,17 @@
 
 <script>
 if ('serviceWorker' in navigator) {
-    // We register the separate sw.js file
-    navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log("Offline Engine: Ready"))
-        .catch(err => console.error("Offline Engine: Failed", err));
+    navigator.serviceWorker.register('./sw.js');
+    navigator.serviceWorker.addEventListener('message', e => {
+        if (e.data?.type === 'SW_UPDATED') {
+            const t = document.getElementById('toast');
+            t.textContent = 'Update available — tap to reload';
+            t.style.cursor = 'pointer';
+            t.onclick = () => location.reload();
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 8000);
+        }
+    });
 }
 </script>
     
