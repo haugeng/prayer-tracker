@@ -120,8 +120,8 @@
         .action-bar { display: flex; gap: 10px; margin-top: 10px; }
         .action-btn { background: #333; color: #eee; font-size: 11px; padding: 6px 10px; border-radius: 4px; border: none; cursor: pointer; }
 
-        .admin-toggle { background: transparent; color: #888; border: 1px solid #333; border-radius: 8px; padding: 8px; font-size: 0.75rem; width: 100%; cursor: pointer; margin-bottom: 10px; }
-        #admin-tools { display: none; flex-direction: column; gap: 8px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #333; }
+        .admin-toggle { background: transparent; color: #888; border: 1px solid #333; border-radius: 8px; padding: 8px; font-size: 0.75rem; width: 100%; cursor: pointer; margin-bottom: 0; }
+        #admin-tools { display: none; flex-direction: column; gap: 8px; margin-bottom: 0; padding-top: 8px; padding-bottom: 10px; border-bottom: 1px solid #333; }
         #admin-tools.open { display: flex; }
         .admin-btn { background: #2a2a2a; color: #bbb; border: 1px solid #444; padding: 8px; border-radius: 6px; font-size: 11px; cursor: pointer; }
 
@@ -173,7 +173,7 @@
 <div class="container">
     <div class="header">
         <h2 style="margin: 0; font-size: 1.3rem;">My Prayer Tracker</h2>
-        <div class="help-icon" onclick="showPage('about')">?</div>
+        <div class="help-icon" onclick="document.getElementById('about-page').classList.contains('hidden') ? showPage('about') : showPage('setup')">?</div>
     </div>
 
     <div class="nav">
@@ -193,7 +193,7 @@
         <div id="main-pointers" contenteditable="true" placeholder="Enter reflections here..."></div>
         <div class="timer-box">
             <div id="display-time">00:00:00</div>
-            <div style="display: flex; justify-content: center; gap: 10px;">
+            <div style="display: flex; justify-content: center; gap: 10px; margin-top: 2px;">
                 <button id="start-btn" class="btn primary" onclick="startSession()">Start Prayer</button>
                 <button id="pause-btn" class="btn secondary hidden" onclick="togglePause()">Pause</button>
                 <button id="stop-btn" class="btn stop hidden" onclick="stopSession()">End</button>
